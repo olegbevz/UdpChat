@@ -14,5 +14,25 @@ namespace UdpChat.Client
         {
             InitializeComponent();
         }
+
+        private void btnSend_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void txtMessage_TextChanged(object sender, EventArgs e)
+        {
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+        }
+
+        private void SGSClient_FormClosing(object sender, FormClosingEventArgs e)
+        {
+        }
+
+        private void txtMessage_KeyDown(object sender, KeyEventArgs e)
+        {
+        }
     }
 }

@@ -33,12 +33,12 @@ namespace UdpChat.Tests
                     Assert.AreEqual(controller.ContactsToReturn, chatClient.Contacts);
                 });
 
-            controller.ContactsToReturn = new[] { "User1" };
-            chatClient.GetContacts(
-                (sender, args) =>
-                    {
-                        Assert.AreEqual(controller.ContactsToReturn, chatClient.Contacts);
-                    });
+            //controller.ContactsToReturn = new[] { "User1" };
+            //chatClient.GetContacts(
+            //    (sender, args) =>
+            //        {
+            //            Assert.AreEqual(controller.ContactsToReturn, chatClient.Contacts);
+            //        });
             //Assert.AreEqual(controller.ContactsToReturn, chatClient.GetContacts());
 
             //controller.ContactsToReturn = new[] { "1" };
