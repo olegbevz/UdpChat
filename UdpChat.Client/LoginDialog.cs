@@ -19,26 +19,50 @@ namespace UdpChat.Client
 
         public string ServerIP { get; set; }
 
-        public long ServerPort { get; set; }
+        public string ServerPort { get; set; }
 
         private void OnCancelButtonClick(object sender, EventArgs e)
         {
+            this.Close();
         }
 
         private void OnOkButtonClick(object sender, EventArgs e)
         {
+            User = txtName.Text;
+            ServerIP = txtServerIP.Text;
+            ServerPort = txtPort.Text;
+
+            this.Close();
         }
 
         private void OnUserNameTextChanged(object sender, EventArgs e)
         {
+            User = txtName.Text;
         }
 
         private void OnServerIpTextChanged(object sender, EventArgs e)
         {
+            ServerIP = txtServerIP.Text;
         }
 
         private void OnLoad(object sender, EventArgs e)
         {
+        }
+
+        private void OnCheckBoxChanged(object sender, EventArgs e)
+        {
+            txtServerIP.Enabled = !checkBox1.Checked;
+
+            if (checkBox1.Checked)
+            {
+                txtServerIP.Tag = txtServerIP.Text;
+
+                txtServerIP.Text = "127.0.0.1";
+            }
+            else
+            {
+                txtServerIP.Text = txtServerIP.Tag as string ?? string.Empty;
+            }
         }
     }
 }

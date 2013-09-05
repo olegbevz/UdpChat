@@ -17,55 +17,44 @@ namespace UdpChat.Server
         public IPEndPoint EndPoint { get; set; }
     }
 
-    public class ChatController : IContract
-    {
-        public ChatController()
-        {
-            Contacts = new List<string>();
-        }
-
-        public List<string> Contacts { get; set; }
-
-        public string[] GetContacts()
-        {
-            return Contacts.ToArray();
-        }
-
-        public void Login(string user)
-        {
-            Contacts.Add(user);
-        }
-
-        public void Logout()
-        {
-            Contacts.Remove("");
-        }
-
-        public void SendMessage(string user, string message)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     public class ChatServer
     {
         private UdpClient _udpServer;
 
-        private IContract _chatController;
+        private List<Contact> _contacts = new List<Contact>();
 
-        private List<Contact> _contacts = new List<Contact>(); 
+        private string _serverName;
 
-        public ChatServer(int port, IContract chatController)
+        private IServerView _view;
+
+        public ChatServer(int port, string serverName, IServerView view)
         {
             _udpServer = new UdpClient(port);
 
             _udpServer.BeginReceive(OnReceive, null);
 
-            _chatController = chatController;
+            _serverName = serverName;
+
+            _view = view;
+        }
+
+        public void Close()
+        {
+            _udpServer.Close();
+        }
+
+        private void WriteLog(string log)
+        {
+            
         }
 
         private void OnReceive(IAsyncResult asyncResult)
         {
+            if (_udpServer.Client == null)
+            {
+                return;
+            }
+
             var endPoint = new IPEndPoint(IPAddress.Any, 0);
 
             var bytes = _udpServer.EndReceive(asyncResult, ref endPoint);
@@ -75,19 +64,16 @@ namespace UdpChat.Server
             switch (message.Type)
             {
                 case MessageType.Login:
-                    _chatController.Login(message.User);
-
                     _contacts.Add(new Contact { User = message.User, EndPoint = endPoint });
 
                     foreach (var contact in _contacts)
                     {
-                        this.SendMessage(message, contact.EndPoint);
+                        this.SendMessageAboutContracts(contact.EndPoint);
                     }
 
+                    _view.WriteLog(string.Format("\'{0}\' has joined the chat.", message.User));
                     break;
                 case MessageType.Logout:
-                    _chatController.Logout();
-
                     for (var i = 0; i < this._contacts.Count; i++)
                     {
                         if (_contacts[i].EndPoint.Equals(endPoint))
@@ -96,24 +82,29 @@ namespace UdpChat.Server
 
                             foreach (var contact in _contacts)
                             {
-                                this.SendMessage(message, contact.EndPoint);
+                                SendMessageAboutContracts(contact.EndPoint);
                             }
+
+                            _view.WriteLog(string.Format("\'{0}\' has escaped the chat.", message.User));
 
                             break;
                         }
                     }
-                   
                     break;
                 case MessageType.Message:
                     foreach (var contact in _contacts)
                     {
-                        this.SendMessage(message, contact.EndPoint);
+                        if (contact.User.Equals(message.User))
+                        {
+                            this.SendMessage(message, contact.EndPoint);
+
+                            _view.WriteLog(string.Format("\'{0}\' has written a message \'{1}\'.", message.User, message.Content));
+                        }
                     }
                     break;
                 case MessageType.Contacts:
+                    _view.WriteLog(string.Format("\'{0}\' has requested the list of contacts.", message.User));
                     this.SendMessageAboutContracts(endPoint);
-                    break;
-                case MessageType.Null:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -126,13 +117,11 @@ namespace UdpChat.Server
         {
             var message = new Message { Type = MessageType.Contacts, User = "Server" };
 
-            var contracts = this._chatController.GetContacts();
-
-            if (contracts.Length > 0)
+            if (_contacts.Count > 0)
             {
-                foreach (var contract in contracts)
+                foreach (var contract in _contacts)
                 {
-                    message.Content += contract + ",";
+                    message.Content += contract.User + ",";
                 }
 
                 message.Content = message.Content.Substring(0, message.Content.Length - 1);

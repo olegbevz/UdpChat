@@ -34,13 +34,14 @@
             this.txtServerIP = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.txtPort = new System.Windows.Forms.TextBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(185, 69);
+            this.btnCancel.Location = new System.Drawing.Point(185, 88);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 5;
@@ -50,8 +51,8 @@
             // 
             // btnOK
             // 
-            this.btnOK.Enabled = false;
-            this.btnOK.Location = new System.Drawing.Point(104, 69);
+            this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.btnOK.Location = new System.Drawing.Point(104, 88);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 4;
@@ -93,21 +94,33 @@
             this.label2.TabIndex = 1;
             this.label2.Text = "&Server IP/Port:";
             // 
-            // textBox1
+            // txtPort
             // 
-            this.textBox1.Location = new System.Drawing.Point(216, 40);
-            this.textBox1.MaxLength = 6;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(44, 20);
-            this.textBox1.TabIndex = 6;
+            this.txtPort.Location = new System.Drawing.Point(216, 40);
+            this.txtPort.MaxLength = 6;
+            this.txtPort.Name = "txtPort";
+            this.txtPort.Size = new System.Drawing.Size(44, 20);
+            this.txtPort.TabIndex = 6;
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(11, 66);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(138, 17);
+            this.checkBox1.TabIndex = 7;
+            this.checkBox1.Text = "Server on this computer";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.OnCheckBoxChanged);
             // 
             // LoginDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(269, 102);
-            this.Controls.Add(this.textBox1);
+            this.ClientSize = new System.Drawing.Size(269, 118);
+            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.txtPort);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtServerIP);
@@ -118,6 +131,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "LoginDialog";
+            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Login";
             this.Load += new System.EventHandler(this.OnLoad);
@@ -134,6 +148,7 @@
         private System.Windows.Forms.TextBox txtServerIP;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox txtPort;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }

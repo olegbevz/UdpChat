@@ -13,9 +13,15 @@ namespace UdpChat.Client
     using System.Collections.Generic;
     using System.Net;
     using System.Net.Sockets;
-    using System.Text;
 
     using UdpChat.Common;
+
+    public interface IClientView
+    {
+        void DisplayContacts(IEnumerable<string> contacts);
+
+        void DisplayMessage(string message);
+    }
 
     public class ChatClient : IContract
     {
@@ -23,21 +29,19 @@ namespace UdpChat.Client
 
         private IPEndPoint _serverEndPoint;
 
-        private IAsyncResult _asyncResult;
-
         private List<string> _contacts = new List<string>();
 
-        public EventHandler ContactsChanged;
+        private IClientView _view;
 
-        public EventHandler MessageWasSend;
+        private string _userName;
 
-        private EventHandler _getContactsCallback;
-
-        public ChatClient(IPEndPoint endPoint)
+        public ChatClient(IPEndPoint endPoint, IClientView view)
         {
             _udpClient = new UdpClient();
 
             _udpClient.Connect(endPoint);
+
+            _view = view;
 
             this.StartReceiving();
         }
@@ -50,10 +54,13 @@ namespace UdpChat.Client
             }
         }
 
+        public void Close()
+        {
+            _udpClient.Close();
+        }
+
         public void GetContacts(EventHandler callback)
         {
-            _getContactsCallback = callback;
-
             var message = new Message { Type = MessageType.Contacts };
 
             SendMessage(message);
@@ -61,11 +68,13 @@ namespace UdpChat.Client
 
         public string[] GetContacts()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public void Login(string user)
         {
+            _userName = user;
+
             var message = new Message { Type = MessageType.Login, User = user, Content = user };
 
             SendMessage(message);
@@ -73,7 +82,7 @@ namespace UdpChat.Client
 
         public void Logout()
         {
-            var message = new Message { Type = MessageType.Logout };
+            var message = new Message { Type = MessageType.Logout, Content = _userName };
 
             SendMessage(message);
         }
@@ -83,10 +92,6 @@ namespace UdpChat.Client
             var message = new Message { Type = MessageType.Message, User = user, Content = content };
 
             SendMessage(message);
-
-            var bytes = _udpClient.Receive(ref _serverEndPoint);
-
-            var response = new Message(bytes);
         }
 
         private void SendMessage(Message message)
@@ -98,11 +103,16 @@ namespace UdpChat.Client
 
         private void StartReceiving()
         {
-            _asyncResult = _udpClient.BeginReceive(this.OnReceive, null);
+            _udpClient.BeginReceive(this.OnReceive, null);
         }
 
         public void OnReceive(IAsyncResult asyncResult)
         {
+            if (_udpClient.Client == null)
+            {
+                return;
+            }
+
             var endPoint = new IPEndPoint(IPAddress.Any, 0);
 
             var bytes = _udpClient.EndReceive(asyncResult, ref endPoint);
@@ -111,22 +121,12 @@ namespace UdpChat.Client
 
             switch (message.Type)
             {
-                case MessageType.Login:
-                    _contacts.Add(message.User);
-                    OnContactsChanged();
-                    break;
-                case MessageType.Logout:
-                    _contacts.Remove(message.User);
-                    OnContactsChanged();
-                    break;
                 case MessageType.Message:
-                    //TODO: Show message
-                    this.OnMessageSent();
+                    _view.DisplayMessage(message.Content);
                     break;
                 case MessageType.Contacts:
                     _contacts = new List<string>(message.Content == null ? new string[0] : message.Content.Split(','));
-                    _getContactsCallback.Invoke(this, EventArgs.Empty);
-                    OnContactsChanged();
+                    _view.DisplayContacts(_contacts);
                     break;
                 case MessageType.Null:
                     break;
@@ -135,22 +135,6 @@ namespace UdpChat.Client
             }
 
             _udpClient.BeginReceive(this.OnReceive, null);
-        }
-
-        public void OnContactsChanged()
-        {
-            if (ContactsChanged != null)
-            {
-                ContactsChanged.Invoke(this, EventArgs.Empty);
-            }
-        }
-
-        public void OnMessageSent()
-        {
-            if (MessageWasSend != null)
-            {
-                MessageWasSend.Invoke(this, EventArgs.Empty);
-            }
         }
     }
 }

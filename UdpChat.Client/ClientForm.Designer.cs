@@ -35,7 +35,7 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mainToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.logInToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.logOutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -53,7 +53,7 @@
             this.btnSend.TabIndex = 3;
             this.btnSend.Text = "Send";
             this.btnSend.UseVisualStyleBackColor = true;
-            this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
+            this.btnSend.Click += new System.EventHandler(this.OnSendButtonClick);
             // 
             // txtChatBox
             // 
@@ -76,8 +76,6 @@
             this.txtMessage.Name = "txtMessage";
             this.txtMessage.Size = new System.Drawing.Size(233, 20);
             this.txtMessage.TabIndex = 1;
-            this.txtMessage.TextChanged += new System.EventHandler(this.txtMessage_TextChanged);
-            this.txtMessage.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtMessage_KeyDown);
             // 
             // lstChatters
             // 
@@ -126,29 +124,31 @@
             // mainToolStripMenuItem
             // 
             this.mainToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.loginToolStripMenuItem,
+            this.logInToolStripMenuItem,
             this.logOutToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.mainToolStripMenuItem.Name = "mainToolStripMenuItem";
             this.mainToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.mainToolStripMenuItem.Text = "Main";
             // 
-            // loginToolStripMenuItem
+            // logInToolStripMenuItem
             // 
-            this.loginToolStripMenuItem.Name = "loginToolStripMenuItem";
-            this.loginToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.loginToolStripMenuItem.Text = "Log in";
+            this.logInToolStripMenuItem.Name = "logInToolStripMenuItem";
+            this.logInToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
+            this.logInToolStripMenuItem.Text = "Log in";
+            this.logInToolStripMenuItem.Click += new System.EventHandler(this.OnLoginButtonClick);
             // 
             // logOutToolStripMenuItem
             // 
             this.logOutToolStripMenuItem.Name = "logOutToolStripMenuItem";
-            this.logOutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.logOutToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
             this.logOutToolStripMenuItem.Text = "Log out";
+            this.logOutToolStripMenuItem.Click += new System.EventHandler(this.OnLogoutButtonClick);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             // 
             // ClientForm
@@ -162,8 +162,8 @@
             this.MinimumSize = new System.Drawing.Size(500, 400);
             this.Name = "ClientForm";
             this.Text = "Udp Chat Client";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SGSClient_FormClosing);
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnClosing);
+            this.Load += new System.EventHandler(this.OnLoad);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.Panel2.PerformLayout();
@@ -184,7 +184,7 @@
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem mainToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem loginToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem logInToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem logOutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
     }
