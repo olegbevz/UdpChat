@@ -1,12 +1,37 @@
-﻿namespace UdpChat.Common
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="MessageType.cs" company="Rubius">
+//   All rights reserved. 2008-2012
+// </copyright>
+// <summary>
+//   Типы сообщений пересылаемых между сервером и клиентом
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace UdpChat.Common
 {
+    /// <summary>
+    /// Типы сообщений пересылаемых между сервером и клиентом
+    /// </summary>
     public enum MessageType
     {
-        Login,      //Log into the server
-        Logout,     //Logout of the server
-        Message,    //Send a text message to all the chat clients
-        Contacts,       //Get a list of users in the chat room from the server
-        Null,        //No command
-        Information
+        /// <summary>
+        /// Сообщение о входе пользователя
+        /// </summary>
+        Login,
+
+        /// <summary>
+        /// Сообщение о выходе пользователя
+        /// </summary>
+        Logout,
+
+        /// <summary>
+        /// Сообщение о записи в чате
+        /// </summary>
+        ChatMessage,
+
+        /// <summary>
+        /// Сообщение со списком контактов
+        /// </summary>
+        Contacts,       
     }
 }

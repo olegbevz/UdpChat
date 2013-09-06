@@ -10,13 +10,6 @@ namespace UdpChat.Server
 
     using Message = UdpChat.Common.Message;
 
-    public class Contact
-    {
-        public string User { get; set; }
-
-        public IPEndPoint EndPoint { get; set; }
-    }
-
     public class ChatServer
     {
         private UdpClient _udpServer;
@@ -91,7 +84,7 @@ namespace UdpChat.Server
                         }
                     }
                     break;
-                case MessageType.Message:
+                case MessageType.ChatMessage:
                     foreach (var contact in _contacts)
                     {
                         if (contact.User.Equals(message.User))
@@ -101,10 +94,6 @@ namespace UdpChat.Server
                             _view.WriteLog(string.Format("\'{0}\' has written a message \'{1}\'.", message.User, message.Content));
                         }
                     }
-                    break;
-                case MessageType.Contacts:
-                    _view.WriteLog(string.Format("\'{0}\' has requested the list of contacts.", message.User));
-                    this.SendMessageAboutContracts(endPoint);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

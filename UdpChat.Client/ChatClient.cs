@@ -89,7 +89,7 @@ namespace UdpChat.Client
 
         public void SendMessage(string user, string content)
         {
-            var message = new Message { Type = MessageType.Message, User = user, Content = content };
+            var message = new Message { Type = MessageType.ChatMessage, User = user, Content = content };
 
             SendMessage(message);
         }
@@ -121,14 +121,12 @@ namespace UdpChat.Client
 
             switch (message.Type)
             {
-                case MessageType.Message:
+                case MessageType.ChatMessage:
                     _view.DisplayMessage(message.Content);
                     break;
                 case MessageType.Contacts:
                     _contacts = new List<string>(message.Content == null ? new string[0] : message.Content.Split(','));
                     _view.DisplayContacts(_contacts);
-                    break;
-                case MessageType.Null:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
