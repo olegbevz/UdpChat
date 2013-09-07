@@ -1,14 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ClientForm.cs" company="">
+//   
+// </copyright>
+// <summary>
+//   Defines the ClientForm type.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace UdpChat.Client
 {
+    using System;
+    using System.Collections.Generic;
     using System.Net;
+    using System.Windows.Forms;
 
     using UdpChat.Common;
 
@@ -57,15 +61,16 @@ namespace UdpChat.Client
 
                 if (dialog.ShowDialog(this) == DialogResult.OK)
                 {
-                    var endPoint = new IPEndPoint(IPAddress.Parse(dialog.ServerIP), int.Parse(dialog.ServerPort));
+                    var endPoint = new IPEndPoint(
+                        IPAddress.Parse(dialog.ServerIP), 
+                        int.Parse(dialog.ServerPort));
 
                     _chatClient = new ChatClient(endPoint, this);
 
-                    var user = dialog.User;
-
-                    _chatClient.Login(user);
+                    _chatClient.Login(dialog.User);
 
                     logInToolStripMenuItem.Enabled = false;
+                    logOutToolStripMenuItem.Enabled = true;
                 }
             }
             catch (Exception ex)
@@ -104,7 +109,6 @@ namespace UdpChat.Client
                 _chatClient.Logout();
 
                 logInToolStripMenuItem.Enabled = true;
-
                 logOutToolStripMenuItem.Enabled = false;
             }
             catch (Exception ex)

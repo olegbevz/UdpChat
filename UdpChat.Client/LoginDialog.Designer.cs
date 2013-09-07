@@ -64,6 +64,7 @@
             // txtName
             // 
             this.txtName.Location = new System.Drawing.Point(89, 14);
+            this.txtName.MaxLength = 100;
             this.txtName.Name = "txtName";
             this.txtName.Size = new System.Drawing.Size(171, 20);
             this.txtName.TabIndex = 2;
@@ -72,6 +73,7 @@
             // txtServerIP
             // 
             this.txtServerIP.Location = new System.Drawing.Point(89, 40);
+            this.txtServerIP.MaxLength = 100;
             this.txtServerIP.Name = "txtServerIP";
             this.txtServerIP.Size = new System.Drawing.Size(121, 20);
             this.txtServerIP.TabIndex = 3;
@@ -102,6 +104,7 @@
             this.txtPort.Name = "txtPort";
             this.txtPort.Size = new System.Drawing.Size(44, 20);
             this.txtPort.TabIndex = 6;
+            this.txtPort.TextChanged += new System.EventHandler(this.OnServerPortTextChanged);
             // 
             // checkBox1
             // 

@@ -79,6 +79,7 @@
             this.txtServerName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtServerName.Location = new System.Drawing.Point(86, 31);
+            this.txtServerName.MaxLength = 100;
             this.txtServerName.Name = "txtServerName";
             this.txtServerName.Size = new System.Drawing.Size(186, 20);
             this.txtServerName.TabIndex = 2;
@@ -88,6 +89,7 @@
             this.txtServerPort.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtServerPort.Location = new System.Drawing.Point(86, 57);
+            this.txtServerPort.MaxLength = 100;
             this.txtServerPort.Name = "txtServerPort";
             this.txtServerPort.Size = new System.Drawing.Size(186, 20);
             this.txtServerPort.TabIndex = 3;

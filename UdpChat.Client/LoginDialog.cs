@@ -1,68 +1,128 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="LoginDialog.cs" company="">
+//   
+// </copyright>
+// <summary>
+//   Defines the LoginDialog type.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace UdpChat.Client
 {
+    using System;
+    using System.Windows.Forms;
+
+    using UdpChat.Common;
+
     public partial class LoginDialog : Form
     {
         public LoginDialog()
         {
             InitializeComponent();
+
+            this.LoadSettings();
         }
 
-        public string User { get; set; }
-
-        public string ServerIP { get; set; }
-
-        public string ServerPort { get; set; }
-
-        private void OnCancelButtonClick(object sender, EventArgs e)
+        public string User
         {
-            this.Close();
+            get
+            {
+                return txtName.Text;
+            }
         }
 
-        private void OnOkButtonClick(object sender, EventArgs e)
-        {
-            User = txtName.Text;
-            ServerIP = txtServerIP.Text;
-            ServerPort = txtPort.Text;
-
-            this.Close();
+        public string ServerIP 
+        { 
+            get
+            {
+                return txtServerIP.Text;
+            }
         }
 
-        private void OnUserNameTextChanged(object sender, EventArgs e)
+        public string ServerPort
         {
-            User = txtName.Text;
+            get
+            {
+                return txtPort.Text;
+            }
         }
 
-        private void OnServerIpTextChanged(object sender, EventArgs e)
+        private void LoadSettings()
         {
-            ServerIP = txtServerIP.Text;
+            this.txtName.Text = Properties.Settings.Default.UserName;
+            this.txtServerIP.Text = Properties.Settings.Default.ServerIP;
+            this.txtPort.Text = Properties.Settings.Default.ServerPort;
+            this.checkBox1.Checked = Properties.Settings.Default.ServerOnThisComputer;
         }
 
         private void OnLoad(object sender, EventArgs e)
         {
+
+        }
+
+        private void OnCancelButtonClick(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void OnOkButtonClick(object sender, EventArgs e)
+        {
+            SaveSetting();
+
+            Close();
+        }
+
+        private void SaveSetting()
+        {
+            Properties.Settings.Default.UserName = this.txtName.Text;
+            Properties.Settings.Default.ServerIP = this.txtServerIP.Text;
+            Properties.Settings.Default.ServerPort = this.txtPort.Text;
+            Properties.Settings.Default.ServerOnThisComputer = this.checkBox1.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void OnUserNameTextChanged(object sender, EventArgs e)
+        {
+            btnOK.Enabled = !string.IsNullOrEmpty(User);
+        }
+
+        private void OnServerIpTextChanged(object sender, EventArgs e)
+        {
+            btnOK.Enabled = !string.IsNullOrEmpty(ServerIP);
+        }
+
+       
+
+        private void OnServerPortTextChanged(object sender, EventArgs e)
+        {
+            int port;
+
+            btnOK.Enabled = int.TryParse(ServerPort, out port);
         }
 
         private void OnCheckBoxChanged(object sender, EventArgs e)
         {
-            txtServerIP.Enabled = !checkBox1.Checked;
-
-            if (checkBox1.Checked)
+            try
             {
-                txtServerIP.Tag = txtServerIP.Text;
+                txtServerIP.Enabled = !checkBox1.Checked;
 
-                txtServerIP.Text = "127.0.0.1";
+                if (checkBox1.Checked)
+                {
+                    txtServerIP.Tag = txtServerIP.Text;
+
+                    txtServerIP.Text = "127.0.0.1";
+                }
+                else
+                {
+                    txtServerIP.Text = txtServerIP.Tag as string ?? string.Empty;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                txtServerIP.Text = txtServerIP.Tag as string ?? string.Empty;
+                ErrorHandling.ShowDialog(this, ex);
             }
         }
+
+       
     }
 }

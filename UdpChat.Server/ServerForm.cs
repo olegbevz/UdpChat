@@ -26,24 +26,40 @@ namespace UdpChat.Server
             InitializeComponent();
 
             stopToolStripMenuItem.Enabled = false;
+            txtServerName.Text = Properties.Settings.Default.ServerName;
+            txtServerPort.Text = Properties.Settings.Default.ServerPort;
         }
 
         private void OnStartServerButtonClick(object sender, EventArgs e)
         {
             try
             {
-                var port = int.Parse(txtServerPort.Text);
-
                 var name = txtServerName.Text;
+
+                if (string.IsNullOrEmpty(name))
+                {
+                    throw new Exception("Server name is not correct.");
+                }
+
+                int port;
+
+                if (!int.TryParse(txtServerPort.Text, out port))
+                {
+                    throw new Exception("Server port is not correct.");
+                }
 
                 _chatServer = new ChatServer(port, name, this);
 
                 stopToolStripMenuItem.Enabled = true;
                 startToolStripMenuItem.Enabled = false;
+
+                Properties.Settings.Default.ServerName = txtServerName.Text;
+                Properties.Settings.Default.ServerPort = txtServerPort.Text;
+                Properties.Settings.Default.Save();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                ErrorHandling.ShowDialog(this, ex);
             }
         }
 
