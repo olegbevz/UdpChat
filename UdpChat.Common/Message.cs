@@ -3,7 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Net;
-    using System.Text;
+
+    using Newtonsoft.Json;
 
     public class Contact
     {
@@ -77,6 +78,7 @@
 
         protected Message()
         {
+            
         }
 
         protected Message(byte[] data)
@@ -107,6 +109,12 @@
 
         public virtual byte[] ToBytes()
         {
+            var json = JsonConvert.SerializeObject(this);
+
+            var bytes = System.Text.Encoding.Unicode.GetBytes(json);
+
+            return bytes;
+
             //List<byte> result = new List<byte>();
 
             ////First four are for the Command
