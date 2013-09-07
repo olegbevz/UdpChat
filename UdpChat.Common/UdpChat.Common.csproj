@@ -35,13 +35,17 @@
       <HintPath>..\packages\Newtonsoft.Json.5.0.6\lib\net20\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Messages\ChatMessage.cs" />
+    <Compile Include="Contact.cs" />
+    <Compile Include="Messages\ContactsMessage.cs" />
     <Compile Include="IContract.cs" />
-    <Compile Include="Message.cs" />
-    <Compile Include="MessageType.cs" />
+    <Compile Include="Messages\Cryptography.cs" />
+    <Compile Include="Messages\LoginMessage.cs" />
+    <Compile Include="Messages\LogoutMessage.cs" />
+    <Compile Include="Messages\Message.cs" />
+    <Compile Include="Messages\MessageType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -15,6 +15,7 @@ namespace UdpChat.Client
     using System.Net.Sockets;
 
     using UdpChat.Common;
+    using UdpChat.Common.Messages;
 
     public interface IClientView
     {

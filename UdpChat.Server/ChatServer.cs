@@ -7,8 +7,9 @@ namespace UdpChat.Server
     using System.Net.Sockets;
 
     using UdpChat.Common;
+    using UdpChat.Common.Messages;
 
-    using Message = UdpChat.Common.Message;
+    using Message = UdpChat.Common.Messages.Message;
 
     public class ChatServer
     {

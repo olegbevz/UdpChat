@@ -45,6 +45,11 @@
   <ItemGroup>
     <Compile Include="ChatControllerMoq.cs" />
     <Compile Include="ClientServerConnectionTests.cs" />
+    <Compile Include="MessageTests\ChatMessageTests.cs" />
+    <Compile Include="MessageTests\ContactsMessageTests.cs" />
+    <Compile Include="MessageTests\LoginMessageTests.cs" />
+    <Compile Include="MessageTests\LogoutMessageTests.cs" />
+    <Compile Include="MessageTests\MessageTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -64,6 +69,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
