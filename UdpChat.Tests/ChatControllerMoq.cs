@@ -35,7 +35,7 @@
             LogoutAction.Invoke();
         }
 
-        public void SendMessage(string user, string message)
+        public void SendChatMessage(string user, string message)
         {
             SendMessageAction.Invoke(user, message);
         }

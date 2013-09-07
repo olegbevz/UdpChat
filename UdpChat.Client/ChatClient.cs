@@ -19,18 +19,18 @@ namespace UdpChat.Client
 
     public interface IClientView
     {
-        void DisplayContacts(IEnumerable<string> contacts);
+        void DisplayContacts(IEnumerable<Contact> contacts);
 
         void DisplayMessage(string message);
     }
 
-    public class ChatClient : IContract
+    public class ChatClient //: IContract
     {
         private UdpClient _udpClient;
 
         private IPEndPoint _serverEndPoint;
 
-        private List<string> _contacts = new List<string>();
+        private List<Contact> _contacts = new List<Contact>();
 
         private IClientView _view;
 
@@ -47,7 +47,7 @@ namespace UdpChat.Client
             this.StartReceiving();
         }
 
-        public IEnumerable<string> Contacts
+        public IEnumerable<Contact> Contacts
         {
             get
             {
@@ -60,37 +60,21 @@ namespace UdpChat.Client
             _udpClient.Close();
         }
 
-        public void GetContacts(EventHandler callback)
-        {
-            var message = new Message { Type = MessageType.Contacts };
-
-            SendMessage(message);
-        }
-
-        public string[] GetContacts()
-        {
-            return null;
-        }
-
         public void Login(string user)
         {
             _userName = user;
 
-            var message = new Message { Type = MessageType.Login, User = user, Content = user };
-
-            SendMessage(message);
+            SendMessage(new LoginMessage(user));
         }
 
         public void Logout()
         {
-            var message = new Message { Type = MessageType.Logout, Content = _userName };
-
-            SendMessage(message);
+            SendMessage(new LogoutMessage());
         }
 
-        public void SendMessage(string user, string content)
+        public void SendChatMessage(Contact receiver, string content)
         {
-            var message = new Message { Type = MessageType.ChatMessage, User = user, Content = content };
+            var message = new ChatMessage(_userName, receiver, content);
 
             SendMessage(message);
         }
@@ -100,6 +84,19 @@ namespace UdpChat.Client
             var bytes = message.ToBytes();
 
             _udpClient.Send(bytes, bytes.Length);
+        }
+
+        private Contact GetContactByEndPoint(IPEndPoint endPoint)
+        {
+            foreach (var contact in _contacts)
+            {
+                if (contact.EndPoint.Equals(endPoint))
+                {
+                    return contact;
+                }
+            }
+
+            return null;
         }
 
         private void StartReceiving()
@@ -118,15 +115,17 @@ namespace UdpChat.Client
 
             var bytes = _udpClient.EndReceive(asyncResult, ref endPoint);
 
-            var message = new Message(bytes);
+            var message = Message.FromBytes(bytes);
 
             switch (message.Type)
             {
                 case MessageType.ChatMessage:
-                    _view.DisplayMessage(message.Content);
+                    var chatMessage = message as ChatMessage;
+                    _view.DisplayMessage(chatMessage.Content);
                     break;
                 case MessageType.Contacts:
-                    _contacts = new List<string>(message.Content == null ? new string[0] : message.Content.Split(','));
+                    var contactsMessage = message as ContactsMessage;
+                    _contacts = contactsMessage.Contacts;
                     _view.DisplayContacts(_contacts);
                     break;
                 default:

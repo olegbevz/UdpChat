@@ -19,6 +19,6 @@ namespace UdpChat.Common
 
         void Logout();
 
-        void SendMessage(string user, string message);
+        void SendChatMessage(string user, string message);
     }
 }

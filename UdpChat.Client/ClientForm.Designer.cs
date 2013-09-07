@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ClientForm));
             this.btnSend = new System.Windows.Forms.Button();
             this.txtChatBox = new System.Windows.Forms.TextBox();
             this.txtMessage = new System.Windows.Forms.TextBox();
@@ -47,9 +48,9 @@
             // btnSend
             // 
             this.btnSend.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSend.Location = new System.Drawing.Point(242, 323);
+            this.btnSend.Location = new System.Drawing.Point(242, 325);
             this.btnSend.Name = "btnSend";
-            this.btnSend.Size = new System.Drawing.Size(75, 23);
+            this.btnSend.Size = new System.Drawing.Size(75, 20);
             this.btnSend.TabIndex = 3;
             this.btnSend.Text = "Send";
             this.btnSend.UseVisualStyleBackColor = true;
@@ -65,6 +66,7 @@
             this.txtChatBox.Multiline = true;
             this.txtChatBox.Name = "txtChatBox";
             this.txtChatBox.ReadOnly = true;
+            this.txtChatBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtChatBox.Size = new System.Drawing.Size(313, 316);
             this.txtChatBox.TabIndex = 2;
             // 
@@ -75,18 +77,21 @@
             this.txtMessage.Location = new System.Drawing.Point(3, 325);
             this.txtMessage.Name = "txtMessage";
             this.txtMessage.Size = new System.Drawing.Size(233, 20);
-            this.txtMessage.TabIndex = 1;
+            this.txtMessage.TabIndex = 0;
+            this.txtMessage.TabStop = false;
             // 
             // lstChatters
             // 
             this.lstChatters.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.lstChatters.DisplayMember = "Name";
             this.lstChatters.FormattingEnabled = true;
             this.lstChatters.Location = new System.Drawing.Point(3, 3);
             this.lstChatters.Name = "lstChatters";
+            this.lstChatters.ScrollAlwaysVisible = true;
             this.lstChatters.Size = new System.Drawing.Size(156, 342);
-            this.lstChatters.TabIndex = 0;
+            this.lstChatters.TabIndex = 1;
             // 
             // splitContainer1
             // 
@@ -134,30 +139,32 @@
             // logInToolStripMenuItem
             // 
             this.logInToolStripMenuItem.Name = "logInToolStripMenuItem";
-            this.logInToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
+            this.logInToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.logInToolStripMenuItem.Text = "Log in";
             this.logInToolStripMenuItem.Click += new System.EventHandler(this.OnLoginButtonClick);
             // 
             // logOutToolStripMenuItem
             // 
             this.logOutToolStripMenuItem.Name = "logOutToolStripMenuItem";
-            this.logOutToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
+            this.logOutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.logOutToolStripMenuItem.Text = "Log out";
             this.logOutToolStripMenuItem.Click += new System.EventHandler(this.OnLogoutButtonClick);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             // 
             // ClientForm
             // 
+            this.AcceptButton = this.btnSend;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(484, 380);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.menuStrip1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(500, 400);
             this.Name = "ClientForm";

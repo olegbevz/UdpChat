@@ -37,11 +37,6 @@ namespace UdpChat.Server
             _udpServer.Close();
         }
 
-        private void WriteLog(string log)
-        {
-            
-        }
-
         private void OnReceive(IAsyncResult asyncResult)
         {
             if (_udpServer.Client == null)
@@ -53,48 +48,40 @@ namespace UdpChat.Server
 
             var bytes = _udpServer.EndReceive(asyncResult, ref endPoint);
 
-            var message = new Message(bytes);
+            var message = Message.FromBytes(bytes);
 
             switch (message.Type)
             {
                 case MessageType.Login:
-                    _contacts.Add(new Contact { User = message.User, EndPoint = endPoint });
+                    var loginMessage = message as LoginMessage;
 
-                    foreach (var contact in _contacts)
-                    {
-                        this.SendMessageAboutContracts(contact.EndPoint);
-                    }
+                    _contacts.Add(new Contact(loginMessage.Sender, endPoint));
 
-                    _view.WriteLog(string.Format("\'{0}\' has joined the chat.", message.User));
+                   BroadcastContactsMessage();
+
+                    _view.WriteLog(string.Format("\'{0}\' has joined the chat.", loginMessage.Sender));
                     break;
                 case MessageType.Logout:
-                    for (var i = 0; i < this._contacts.Count; i++)
+                    var logoutContact = GetContactByEndPoint(endPoint);
+
+                    if (logoutContact != null)
                     {
-                        if (_contacts[i].EndPoint.Equals(endPoint))
-                        {
-                            _contacts.RemoveAt(i);
+                        _contacts.Remove(logoutContact);
 
-                            foreach (var contact in _contacts)
-                            {
-                                SendMessageAboutContracts(contact.EndPoint);
-                            }
+                        this.BroadcastContactsMessage();
 
-                            _view.WriteLog(string.Format("\'{0}\' has escaped the chat.", message.User));
-
-                            break;
-                        }
+                        _view.WriteLog(string.Format("\'{0}\' has escaped the chat.", logoutContact.Name));
                     }
                     break;
                 case MessageType.ChatMessage:
-                    foreach (var contact in _contacts)
-                    {
-                        if (contact.User.Equals(message.User))
-                        {
-                            this.SendMessage(message, contact.EndPoint);
+                    var chatMessage = message as ChatMessage;
+                    
+                    var receiver = GetContactByEndPoint(chatMessage.Receiver.EndPoint);
 
-                            _view.WriteLog(string.Format("\'{0}\' has written a message \'{1}\'.", message.User, message.Content));
-                        }
-                    }
+                    SendMessage(message, receiver.EndPoint);
+
+                    _view.WriteLog(string.Format("\'{0}\' has written a message \'{1}\'.", receiver.Name, chatMessage.Content));
+                
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -103,21 +90,30 @@ namespace UdpChat.Server
             _udpServer.BeginReceive(this.OnReceive, null);
         }
 
-        private void SendMessageAboutContracts(IPEndPoint endPoint)
+        private Contact GetContactByEndPoint(IPEndPoint endPoint)
         {
-            var message = new Message { Type = MessageType.Contacts, User = "Server" };
-
-            if (_contacts.Count > 0)
+            foreach (var contact in _contacts)
             {
-                foreach (var contract in _contacts)
+                if (contact.EndPoint.Equals(endPoint))
                 {
-                    message.Content += contract.User + ",";
+                    return contact;
                 }
-
-                message.Content = message.Content.Substring(0, message.Content.Length - 1);
             }
 
-            this.SendMessage(message, endPoint);
+            return null;
+        }
+
+        private void BroadcastContactsMessage()
+        {
+            foreach (var contact in _contacts)
+            {
+                this.SendContractsMessage(contact.EndPoint);
+            }
+        }
+
+        private void SendContractsMessage(IPEndPoint endPoint)
+        {
+            this.SendMessage(new ContactsMessage(_contacts), endPoint);
         }
 
         private void SendMessage(Message message, IPEndPoint endPoint)

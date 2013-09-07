@@ -19,7 +19,7 @@ namespace UdpChat.Server
 
     public partial class ServerForm : Form, IServerView
     {
-        private ChatServer _charServer;
+        private ChatServer _chatServer;
 
         public ServerForm()
         {
@@ -36,7 +36,7 @@ namespace UdpChat.Server
 
                 var name = txtServerName.Text;
 
-                _charServer = new ChatServer(port, name, this);
+                _chatServer = new ChatServer(port, name, this);
 
                 stopToolStripMenuItem.Enabled = true;
                 startToolStripMenuItem.Enabled = false;
@@ -51,7 +51,7 @@ namespace UdpChat.Server
         {
             try
             {
-                _charServer.Close();
+                _chatServer.Close();
 
                 startToolStripMenuItem.Enabled = true;
                 stopToolStripMenuItem.Enabled = false;
@@ -64,7 +64,10 @@ namespace UdpChat.Server
 
         protected override void OnClosed(EventArgs e)
         {
-            _charServer.Close();
+            if (_chatServer != null)
+            {
+                _chatServer.Close();
+            }
 
             base.OnClosed(e);
         }
@@ -75,7 +78,8 @@ namespace UdpChat.Server
             {
                 txtLog.Invoke((MethodInvoker)delegate
                         {
-                            txtLog.Text += log + "\n";
+                            txtLog.AppendText(log);
+                            txtLog.AppendText(Environment.NewLine);
                         });
             }
         }

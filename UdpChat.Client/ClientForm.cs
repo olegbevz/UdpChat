@@ -10,6 +10,8 @@ namespace UdpChat.Client
 {
     using System.Net;
 
+    using UdpChat.Common;
+
     public partial class ClientForm : Form, IClientView
     {
         private ChatClient _chatClient;
@@ -25,11 +27,11 @@ namespace UdpChat.Client
             {
                 if (lstChatters.SelectedItem != null)
                 {
-                    var message = txtMessage.Text;
+                    var contact = lstChatters.SelectedItem as Contact;
 
-                    var contact = lstChatters.SelectedItem.ToString();
+                    _chatClient.SendChatMessage(contact, txtMessage.Text);
 
-                    _chatClient.SendMessage(contact, message);
+                    txtMessage.Text = string.Empty;
                 }
             }
             catch (Exception ex)
@@ -40,6 +42,7 @@ namespace UdpChat.Client
 
         private void OnLoad(object sender, EventArgs e)
         {
+            txtMessage.Select();
         }
 
         private void OnClosing(object sender, FormClosingEventArgs e)
@@ -62,8 +65,6 @@ namespace UdpChat.Client
 
                     _chatClient.Login(user);
 
-                    _chatClient.GetContacts(null);
-
                     logInToolStripMenuItem.Enabled = false;
                 }
             }
@@ -73,7 +74,7 @@ namespace UdpChat.Client
             }
         }
 
-        public void DisplayContacts(IEnumerable<string> contacts)
+        public void DisplayContacts(IEnumerable<Contact> contacts)
         {
                 lstChatters.Invoke((MethodInvoker)delegate 
                         {
@@ -91,7 +92,8 @@ namespace UdpChat.Client
             this.txtChatBox.Invoke(
                 (MethodInvoker)delegate
                     {
-                        txtChatBox.Text += message + "\n";
+                        txtChatBox.AppendText(message);
+                        txtChatBox.AppendText(Environment.NewLine);
                     });
         }
 
