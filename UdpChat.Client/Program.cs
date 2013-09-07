@@ -4,6 +4,8 @@ using System.Windows.Forms;
 
 namespace UdpChat.Client
 {
+    using UdpChat.Common;
+
     static class Program
     {
         /// <summary>
@@ -12,9 +14,16 @@ namespace UdpChat.Client
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new ClientForm());
+            try
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new ClientForm());
+            }
+            catch (Exception ex)
+            {
+                ErrorHandling.ShowException(null, ex);
+            }
         }
     }
 }

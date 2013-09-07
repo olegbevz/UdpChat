@@ -44,16 +44,30 @@ namespace UdpChat.Client
             }
         }
 
-        private void OnLoad(object sender, EventArgs e)
+        protected override void OnShown(EventArgs e)
         {
+            ShowLoginDialog();
+
             txtMessage.Select();
+
+            base.OnShown(e);
         }
 
-        private void OnClosing(object sender, FormClosingEventArgs e)
+        protected override void OnClosed(EventArgs e)
         {
+            _chatClient.Logout();
+
+            _chatClient.Close();
+
+            base.OnClosed(e);
         }
 
         private void OnLoginButtonClick(object sender, EventArgs e)
+        {
+            this.ShowLoginDialog();
+        }
+
+        private void ShowLoginDialog()
         {
             try
             {
@@ -61,16 +75,11 @@ namespace UdpChat.Client
 
                 if (dialog.ShowDialog(this) == DialogResult.OK)
                 {
-                    var endPoint = new IPEndPoint(
-                        IPAddress.Parse(dialog.ServerIP), 
-                        int.Parse(dialog.ServerPort));
+                    var endPoint = new IPEndPoint(IPAddress.Parse(dialog.ServerIP), int.Parse(dialog.ServerPort));
 
-                    _chatClient = new ChatClient(endPoint, this);
+                    this._chatClient = new ChatClient(endPoint, this);
 
-                    _chatClient.Login(dialog.User);
-
-                    logInToolStripMenuItem.Enabled = false;
-                    logOutToolStripMenuItem.Enabled = true;
+                    this._chatClient.Login(dialog.User);
                 }
             }
             catch (Exception ex)
@@ -88,7 +97,11 @@ namespace UdpChat.Client
                             foreach (var contact in contacts)
                             {
                                 lstChatters.Items.Add(contact);
+
+                                lstChatters.SelectedIndex = 0;
                             }
+
+                            txtMessage.Select();
                         });
         }
 
@@ -102,14 +115,43 @@ namespace UdpChat.Client
                     });
         }
 
+        public void DisableClient()
+        {
+            Invoke(
+                (MethodInvoker)delegate
+                    {
+                        logInToolStripMenuItem.Enabled = true;
+                        logOutToolStripMenuItem.Enabled = false;
+                        txtMessage.Enabled = false;
+                        btnSend.Enabled = false;
+                        lstChatters.Items.Clear();
+                        txtChatBox.Clear();
+                        txtMessage.Clear();
+                    });
+        }
+
+        public void EnableClient()
+        {
+            Invoke(
+               (MethodInvoker)delegate
+               {
+                   logInToolStripMenuItem.Enabled = false;
+                   logOutToolStripMenuItem.Enabled = true;
+                   txtMessage.Enabled = true;
+                   btnSend.Enabled = true;
+               });
+        }
+
+        public void ShowException(Exception ex)
+        {
+           ErrorHandling.ShowExceptionThreadSafe(this, ex);
+        }
+
         private void OnLogoutButtonClick(object sender, EventArgs e)
         {
             try
             {
                 _chatClient.Logout();
-
-                logInToolStripMenuItem.Enabled = true;
-                logOutToolStripMenuItem.Enabled = false;
             }
             catch (Exception ex)
             {

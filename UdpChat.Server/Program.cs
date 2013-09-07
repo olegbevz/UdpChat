@@ -12,9 +12,16 @@ namespace UdpChat.Server
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new ServerForm());
+            try
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new ServerForm());
+            }
+            catch (Exception ex)
+            {
+                ErrorHandling.ShowDialog(null, ex);
+            }
         }
     }
 }

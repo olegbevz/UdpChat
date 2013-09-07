@@ -119,7 +119,7 @@ namespace UdpChat.Client
             }
             catch (Exception ex)
             {
-                ErrorHandling.ShowDialog(this, ex);
+                ErrorHandling.ShowException(this, ex);
             }
         }
 

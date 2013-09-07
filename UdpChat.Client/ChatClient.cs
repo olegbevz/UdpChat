@@ -22,6 +22,12 @@ namespace UdpChat.Client
         void DisplayContacts(IEnumerable<Contact> contacts);
 
         void DisplayMessage(string message);
+
+        void DisableClient();
+
+        void EnableClient();
+
+        void ShowException(Exception ex);
     }
 
     public class ChatClient //: IContract
@@ -77,6 +83,8 @@ namespace UdpChat.Client
             var message = new ChatMessage(_userName, receiver, content);
 
             SendMessage(message);
+
+            this.OnChatMessage(message);
         }
 
         private void SendMessage(Message message)
@@ -106,33 +114,56 @@ namespace UdpChat.Client
 
         public void OnReceive(IAsyncResult asyncResult)
         {
-            if (_udpClient.Client == null)
+            try
             {
-                return;
+                if (_udpClient.Client == null)
+                {
+                    return;
+                }
+
+                var endPoint = new IPEndPoint(IPAddress.Any, 0);
+
+                var bytes = _udpClient.EndReceive(asyncResult, ref endPoint);
+
+                var message = Message.FromBytes(bytes);
+
+                switch (message.Type)
+                {
+                    case MessageType.ChatMessage:
+                        OnChatMessage(message as ChatMessage);
+                        break;
+                    case MessageType.Contacts:
+                        var contactsMessage = message as ContactsMessage;
+                        _contacts = contactsMessage.Contacts;
+                        _view.DisplayContacts(_contacts);
+                        break;
+                    case MessageType.Login:
+                        _view.EnableClient();
+                        break;
+                    case MessageType.Logout:
+                        _view.DisableClient();
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                _udpClient.BeginReceive(this.OnReceive, null);
             }
-
-            var endPoint = new IPEndPoint(IPAddress.Any, 0);
-
-            var bytes = _udpClient.EndReceive(asyncResult, ref endPoint);
-
-            var message = Message.FromBytes(bytes);
-
-            switch (message.Type)
+            catch (Exception ex)
             {
-                case MessageType.ChatMessage:
-                    var chatMessage = message as ChatMessage;
-                    _view.DisplayMessage(chatMessage.Content);
-                    break;
-                case MessageType.Contacts:
-                    var contactsMessage = message as ContactsMessage;
-                    _contacts = contactsMessage.Contacts;
-                    _view.DisplayContacts(_contacts);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                _view.ShowException(ex);
             }
+        }
 
-            _udpClient.BeginReceive(this.OnReceive, null);
+        private void OnChatMessage(ChatMessage chatMessage)
+        {
+            var content = string.Format(
+                "{0} {1}: {2}", 
+                DateTime.Now, 
+                chatMessage.Sender, 
+                chatMessage.Content);
+
+            this._view.DisplayMessage(content);
         }
     }
 }

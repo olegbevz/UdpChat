@@ -15,6 +15,8 @@ namespace UdpChat.Server
     public interface IServerView
     {
         void WriteLog(string log);
+
+        void ShowException(Exception ex);
     }
 
     public partial class ServerForm : Form, IServerView
@@ -98,6 +100,16 @@ namespace UdpChat.Server
                             txtLog.AppendText(Environment.NewLine);
                         });
             }
+            else
+            {
+                txtLog.AppendText(log);
+                txtLog.AppendText(Environment.NewLine);
+            }
+        }
+
+        public void ShowException(Exception ex)
+        {
+            Common.ErrorHandling.ShowExceptionThreadSafe(this, ex);
         }
     }
 }
