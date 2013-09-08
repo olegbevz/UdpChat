@@ -20,9 +20,19 @@ namespace UdpChat.Common.Messages
         Login,
 
         /// <summary>
+        /// Сообщение с подтверждением входа пользователя в чат
+        /// </summary>
+        LoginAccepted,
+
+        /// <summary>
         /// Сообщение о выходе пользователя
         /// </summary>
         Logout,
+
+        /// <summary>
+        /// Сообщение с потверждением выхода пользователя из чата
+        /// </summary>
+        LogoutAccepted,
 
         /// <summary>
         /// Сообщение о записи в чате

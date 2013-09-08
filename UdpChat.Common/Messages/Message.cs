@@ -36,19 +36,21 @@ namespace UdpChat.Common.Messages
         /// </returns>
         public static Message FromBytes(byte[] bytes)
         {
-            string jsonString;
+            var jsonString = string.Empty;
 
             try
             {
                 jsonString = Cryptography.Decrypt(bytes);
 
-                return JsonConvert.DeserializeObject<Message>(
-                    jsonString,
-                    new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+                    return JsonConvert.DeserializeObject<Message>(
+                      jsonString,
+                      new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                throw new Exception(
+                    string.Format(
+                    "Error while reading message from JSON string \"{0}\".", jsonString), ex);
             }
         }
 
@@ -61,10 +63,26 @@ namespace UdpChat.Common.Messages
         public virtual byte[] ToBytes()
         {
             var json = JsonConvert.SerializeObject(
-                this, 
-                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+              this,
+              new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
 
             var bytes = Cryptography.Encrypt(json);
+
+            //var jsonStringForCheck = Cryptography.Decrypt(bytes);
+
+            //if (json != jsonStringForCheck)
+            //{
+            //    throw new Exception();
+            //}
+
+            //var messageForCheck = JsonConvert.DeserializeObject<Message>(
+            //      jsonStringForCheck,
+            //      new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+
+            //if (!messageForCheck.Equals(this))
+            //{
+            //    throw new Exception();
+            //}
 
             return bytes;
         }

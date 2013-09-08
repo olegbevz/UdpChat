@@ -83,9 +83,7 @@ namespace UdpChat.Server
         {
             foreach (var contact in _contacts)
             {
-                this.SendGoodByeMessage(contact);
-
-                SendMessage(new LogoutMessage(), contact.EndPoint);
+                SendLogoutAcceptedMessage(contact);
             }
 
             _contacts.Clear();
@@ -121,7 +119,7 @@ namespace UdpChat.Server
 
                 SendChatMessage(message, inactiveContact);
 
-                SendMessage(new LogoutMessage(), inactiveContact.EndPoint);
+                SendLogoutAcceptedMessage(inactiveContact);
 
                 _contacts.Remove(inactiveContact);
             }
@@ -222,14 +220,11 @@ namespace UdpChat.Server
             {
                 _contacts.Remove(logoutContact);
 
-                // Отсылаем сообщение с прощанием
-                SendGoodByeMessage(logoutContact);
-
                 // Отсылаем подтверждение об удалении пользователя на сервере
-                SendMessage(message, endPoint);
+                this.SendLogoutAcceptedMessage(logoutContact);
 
                 // Отсылаем обновленный список контактов всем пользователям
-                this.BroadcastContactsMessage();
+                BroadcastContactsMessage();
 
                 WriteLog(string.Format("\'{0}\' has escaped the chat.", logoutContact.Name));
             }
@@ -261,13 +256,10 @@ namespace UdpChat.Server
                 _contacts.Add(contact);
 
                 // Отсылаем подтверждение о добавлении пользователя на сервере
-                SendMessage(message, endPoint);
+                SendLoginAcceptedMessage(contact);
 
                 // Отсылаем обновленный список контактов всем пользователям
-                BroadcastContactsMessage();
-
-                // Отсылаем сообщение зашетшему пользователю с приветствием
-                SendWelcomeMessage(contact);
+                BroadcastContactsMessage(contact);
 
                 WriteLog(string.Format("\'{0}\' has joined the chat.", message.Sender));
             }
@@ -283,9 +275,11 @@ namespace UdpChat.Server
         /// <param name="contact">
         /// Получатель сообщения
         /// </param>
-        private void SendGoodByeMessage(Contact contact)
+        private void SendLogoutAcceptedMessage(Contact contact)
         {
-            this.SendChatMessage(string.Format("Goodbye, {0}!", contact.Name), contact);
+            var goodByeMessage = string.Format("Goodbye, {0}!", contact.Name);
+
+            SendMessage(new LogoutAcceptedMessage(_serverName, goodByeMessage), contact.EndPoint);
         }
 
         /// <summary>
@@ -294,11 +288,14 @@ namespace UdpChat.Server
         /// <param name="contact">
         /// Получатель сообщения
         /// </param>
-        private void SendWelcomeMessage(Contact contact)
+        private void SendLoginAcceptedMessage(Contact contact)
         {
-            this.SendChatMessage(
-                string.Format("Hello, {0}! Welcome to chat on server \'{1}\'!", contact.Name, this._serverName),
-                contact);
+            var welcomeMessage = string.Format(
+                "Hello, {0}! Welcome to chat on server \'{1}\'!", contact.Name, _serverName);
+
+            this.SendMessage(
+                new LoginAcceptedMessage(_serverName, welcomeMessage, _contacts), 
+                contact.EndPoint);
         }
 
         /// <summary>
@@ -328,6 +325,20 @@ namespace UdpChat.Server
             foreach (var contact in _contacts)
             {
                 this.SendContractsMessage(contact.EndPoint);
+            }
+        }
+
+        /// <summary>
+        /// Отправить всем пользователям чата сообщение со списком контактов
+        /// </summary>
+        private void BroadcastContactsMessage(Contact exceptedContact)
+        {
+            foreach (var contact in _contacts)
+            {
+                if (!contact.Equals(exceptedContact))
+                {
+                    this.SendContractsMessage(contact.EndPoint);
+                }
             }
         }
 

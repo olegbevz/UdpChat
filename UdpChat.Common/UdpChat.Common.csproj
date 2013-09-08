@@ -43,7 +43,9 @@
     <Compile Include="Contact.cs" />
     <Compile Include="Messages\ContactsMessage.cs" />
     <Compile Include="Messages\Cryptography.cs" />
+    <Compile Include="Messages\LoginAcceptedMessage.cs" />
     <Compile Include="Messages\LoginMessage.cs" />
+    <Compile Include="Messages\LogoutAcceptedMessage.cs" />
     <Compile Include="Messages\LogoutMessage.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="Messages\MessageType.cs" />

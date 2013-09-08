@@ -30,7 +30,7 @@ namespace UdpChat.Client
         public ChatClient(IClientView view)
         {
             _udpClient = new UdpClient();
-
+            
             _view = view;
         }
 
@@ -99,7 +99,7 @@ namespace UdpChat.Client
         {
             var bytes = message.ToBytes();
 
-            _udpClient.Send(bytes, bytes.Length);
+            _udpClient.BeginSend(bytes, bytes.Length, null, null);
         }
 
         #endregion
@@ -129,18 +129,16 @@ namespace UdpChat.Client
                             OnChatMessage(message as ChatMessage);
                             break;
                         case MessageType.Contacts:
-                            this.OnContactsMessage(message as ContactsMessage);
+                            OnContactsMessage(message as ContactsMessage);
                             break;
-                        case MessageType.Login:
-                            IsInChat = true;
-                            _view.EnableClient();
+                        case MessageType.LoginAccepted:
+                            OnLoginAcceptedMessage(message as LoginAcceptedMessage);
                             break;
-                        case MessageType.Logout:
-                            IsInChat = false;
-                            _view.DisableClient();
+                        case MessageType.LogoutAccepted:
+                            OnLogoutAcceptedMessage(message as LogoutAcceptedMessage);
                             break;
                         default:
-                            throw new ArgumentOutOfRangeException();
+                            throw new ArgumentOutOfRangeException("Unknown message was received.");
                     }
 
                     _udpClient.BeginReceive(this.OnReceive, null);
@@ -152,6 +150,23 @@ namespace UdpChat.Client
             }
         }
 
+        private void OnLoginAcceptedMessage(LoginAcceptedMessage message)
+        {
+            IsInChat = true;
+            _view.EnableClient();
+            _view.DisplayContacts(message.Contacts);
+
+            DiplayMessage(message.ServerName, message.WelcomeMessage);
+        }
+
+        private void OnLogoutAcceptedMessage(LogoutAcceptedMessage message)
+        {
+            IsInChat = false;
+            _view.DisableClient();
+
+            DiplayMessage(message.ServerName, message.GoodByeMessage);
+        }
+
         /// <summary>
         /// Обработчик сообщения со списком контактов
         /// </summary>
@@ -161,6 +176,7 @@ namespace UdpChat.Client
         private void OnContactsMessage(ContactsMessage message)
         {
             _contacts = message.Contacts;
+
             _view.DisplayContacts(_contacts);
         }
 
@@ -172,11 +188,16 @@ namespace UdpChat.Client
         /// </param>
         private void OnChatMessage(ChatMessage chatMessage)
         {
+            DiplayMessage(chatMessage.Sender, chatMessage.Content);
+        }
+
+        private void DiplayMessage(string sender, string message)
+        {
             var content = string.Format(
-                "{0} {1}: {2}", 
-                DateTime.Now, 
-                chatMessage.Sender, 
-                chatMessage.Content);
+               "{0} {1}: {2}",
+               DateTime.Now,
+               sender,
+               message);
 
             _view.DisplayMessage(content);
         }

@@ -146,6 +146,8 @@ namespace UdpChat.Client
 
         public void DisplayMessage(string message)
         {
+
+
             this.txtChatBox.Invoke(
                 (MethodInvoker)delegate
                     {
