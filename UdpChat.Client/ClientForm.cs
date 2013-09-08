@@ -55,9 +55,12 @@ namespace UdpChat.Client
 
         protected override void OnClosed(EventArgs e)
         {
-            _chatClient.Logout();
+            if (_chatClient != null)
+            {
+                _chatClient.Logout();
 
-            _chatClient.Close();
+                _chatClient.Close();
+            }
 
             base.OnClosed(e);
         }
@@ -157,6 +160,11 @@ namespace UdpChat.Client
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private void OnExitButtonClick(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

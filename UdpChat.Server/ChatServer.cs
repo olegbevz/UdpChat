@@ -13,37 +13,40 @@ namespace UdpChat.Server
 
     public class ChatServer
     {
-        private UdpClient _udpServer;
+        private readonly UdpClient _udpServer;
 
         private List<Contact> _contacts = new List<Contact>();
 
-        private string _serverName;
+        private readonly string _serverName;
 
-        private IServerView _view;
+        private readonly IServerView _view;
 
-        public ChatServer(int port, string serverName, IServerView view)
+        private readonly IEnumerable<ILogging> _loggers; 
+
+        public ChatServer(int port, string serverName, IServerView view, IEnumerable<ILogging> loggers)
         {
-            _udpServer = new UdpClient(port);
-
-            _udpServer.BeginReceive(OnReceive, null);
-
             _serverName = serverName;
 
             _view = view;
 
-            var ip = this.GetLocalIP();
+            _loggers = loggers;
 
-            if (ip != null)
-            {
-                _view.WriteLog(string.Format("Server \'{0}\' was started at {1}:{2}.", serverName, ip, port));
-            }
+            WriteLog(string.Format(
+                "Server \'{0}\' was started at {1}:{2}.", 
+                serverName, 
+                this.GetLocalIP() ?? IPAddress.None, 
+                port));
+
+            _udpServer = new UdpClient(port);
+
+            _udpServer.BeginReceive(OnReceive, null);
         }
 
         public void Close()
         {
             _udpServer.Close();
 
-            _view.WriteLog(string.Format("Server \'{0}\' was closed.", _serverName));
+            WriteLog(string.Format("Server \'{0}\' was closed.", _serverName));
         }
 
         private IPAddress GetLocalIP()
@@ -79,14 +82,13 @@ namespace UdpChat.Server
                 switch (message.Type)
                 {
                     case MessageType.Login:
-                        this.OnLoginMessage(message, endPoint);
+                        this.OnLoginMessage(message as LoginMessage, endPoint);
                         break;
                     case MessageType.Logout:
                         this.OnLogoutMessage(endPoint, message);
                         break;
                     case MessageType.ChatMessage:
-                        var chatMessage = message as ChatMessage;
-                        this.OnChatMessage(chatMessage);
+                        this.OnChatMessage(message as ChatMessage);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -106,7 +108,7 @@ namespace UdpChat.Server
 
             this.SendMessage(message, receiver.EndPoint);
 
-            this._view.WriteLog(string.Format("\'{0}\' has written to \'{1}\' a message \'{2}\'.", message.Sender, receiver.Name, message.Content));
+            WriteLog(string.Format("\'{0}\' has written to \'{1}\' a message \'{2}\'.", message.Sender, receiver.Name, message.Content));
         }
 
         private void OnLogoutMessage(IPEndPoint endPoint, Message message)
@@ -122,26 +124,31 @@ namespace UdpChat.Server
 
                 this.BroadcastContactsMessage();
 
-                _view.WriteLog(string.Format("\'{0}\' has escaped the chat.", logoutContact.Name));
+                WriteLog(string.Format("\'{0}\' has escaped the chat.", logoutContact.Name));
             }
         }
 
-        private void OnLoginMessage(Message message, IPEndPoint endPoint)
+        private void OnLoginMessage(LoginMessage message, IPEndPoint endPoint)
         {
-            var loginMessage = message as LoginMessage;
+            if (GetContactByEndPoint(endPoint) != null)
+            {
+                return;
+            }
 
-            var contact = new Contact(loginMessage.Sender, endPoint);
+            var contact = new Contact(message.Sender, endPoint);
 
             this._contacts.Add(contact);
 
             // Отсылаем подтверждение о добавлении пользователя на сервере
-            this.SendMessage(loginMessage, endPoint);
+            this.SendMessage(message, endPoint);
 
+            // Отсылаем обновленный список контактов всем пользователям
             this.BroadcastContactsMessage();
 
+            // Отсылаем сообщение зашетшему пользователю с приветствием
             this.SendWelcomeMessage(endPoint, contact);
 
-            _view.WriteLog(string.Format("\'{0}\' has joined the chat.", loginMessage.Sender));
+            WriteLog(string.Format("\'{0}\' has joined the chat.", message.Sender));
         }
 
         private void SendWelcomeMessage(IPEndPoint endPoint, Contact contact)
@@ -167,8 +174,6 @@ namespace UdpChat.Server
             return null;
         }
 
-
-
         private void BroadcastContactsMessage()
         {
             foreach (var contact in _contacts)
@@ -187,6 +192,14 @@ namespace UdpChat.Server
             var bytes = message.ToBytes();
 
             _udpServer.Send(bytes, bytes.Length, endPoint);
+        }
+
+        private void WriteLog(string log)
+        {
+            foreach (var logging in _loggers)
+            {
+                logging.WriteLog(log);
+            }
         }
     }
 }

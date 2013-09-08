@@ -12,14 +12,9 @@ namespace UdpChat.Server
     using System;
     using System.Windows.Forms;
 
-    public interface IServerView
-    {
-        void WriteLog(string log);
+    using UdpChat.Common;
 
-        void ShowException(Exception ex);
-    }
-
-    public partial class ServerForm : Form, IServerView
+    public partial class ServerForm : Form, IServerView, ILogging
     {
         private ChatServer _chatServer;
 
@@ -50,7 +45,9 @@ namespace UdpChat.Server
                     throw new Exception("Server port is not correct.");
                 }
 
-                _chatServer = new ChatServer(port, name, this);
+                var eventLogging = new EventLogging("Udp Chat", "Application");
+
+                _chatServer = new ChatServer(port, name, this, new ILogging[] { this, eventLogging });
 
                 stopToolStripMenuItem.Enabled = true;
                 startToolStripMenuItem.Enabled = false;
@@ -61,7 +58,7 @@ namespace UdpChat.Server
             }
             catch (Exception ex)
             {
-                ErrorHandling.ShowDialog(this, ex);
+                ErrorHandling.ShowException(this, ex);
             }
         }
 

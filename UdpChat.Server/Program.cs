@@ -4,6 +4,8 @@ using System.Windows.Forms;
 
 namespace UdpChat.Server
 {
+    using UdpChat.Common;
+
     static class Program
     {
         /// <summary>
@@ -20,7 +22,7 @@ namespace UdpChat.Server
             }
             catch (Exception ex)
             {
-                ErrorHandling.ShowDialog(null, ex);
+                ErrorHandling.ShowException(null, ex);
             }
         }
     }

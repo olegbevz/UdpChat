@@ -45,7 +45,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChatServer.cs" />
-    <Compile Include="ErrorHandling.cs" />
+    <Compile Include="EventLogging.cs" />
+    <Compile Include="ILogging.cs" />
+    <Compile Include="IServerView.cs" />
     <Compile Include="ServerForm.cs">
       <SubType>Form</SubType>
     </Compile>
