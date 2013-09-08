@@ -81,23 +81,12 @@ namespace UdpChat.Client
             Properties.Settings.Default.Save();
         }
 
-        private void OnUserNameTextChanged(object sender, EventArgs e)
-        {
-            btnOK.Enabled = !string.IsNullOrEmpty(User);
-        }
-
-        private void OnServerIpTextChanged(object sender, EventArgs e)
-        {
-            btnOK.Enabled = !string.IsNullOrEmpty(ServerIP);
-        }
-
-       
-
-        private void OnServerPortTextChanged(object sender, EventArgs e)
+        private void OnTextChanged(object sender, EventArgs e)
         {
             int port;
 
-            btnOK.Enabled = int.TryParse(ServerPort, out port);
+            btnOK.Enabled = !string.IsNullOrEmpty(User) && !string.IsNullOrEmpty(ServerIP)
+                            && int.TryParse(ServerPort, out port);
         }
 
         private void OnCheckBoxChanged(object sender, EventArgs e)

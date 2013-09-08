@@ -1,5 +1,6 @@
 ﻿namespace UdpChat.Common
 {
+    using System;
     using System.Net;
 
     using Newtonsoft.Json;
@@ -44,7 +45,17 @@
 
         public string IP { get; set; }
 
+        /// <summary>
+        /// Gets or sets the port.
+        /// </summary>
         public int Port { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last active time.
+        /// Время последней активности клиента
+        /// </summary>
+        [JsonIgnore]
+        public DateTime LastActiveTime { get; set; }
 
         public override bool Equals(object obj)
         {

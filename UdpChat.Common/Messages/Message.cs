@@ -9,6 +9,8 @@
 
 namespace UdpChat.Common.Messages
 {
+    using System;
+
     using Newtonsoft.Json;
 
     /// <summary>
@@ -34,12 +36,20 @@ namespace UdpChat.Common.Messages
         /// </returns>
         public static Message FromBytes(byte[] bytes)
         {
-            var jsonString = Cryptography.Decrypt(bytes);
+            string jsonString;
 
-            return JsonConvert.DeserializeObject<Message>(
-                jsonString, 
-                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+            try
+            {
+                jsonString = Cryptography.Decrypt(bytes);
 
+                return JsonConvert.DeserializeObject<Message>(
+                    jsonString,
+                    new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         /// <summary>

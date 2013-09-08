@@ -43,7 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChatControllerMoq.cs" />
     <Compile Include="ClientServerConnectionTests.cs" />
     <Compile Include="MessageTests\ChatMessageTests.cs" />
     <Compile Include="MessageTests\ContactsMessageTests.cs" />

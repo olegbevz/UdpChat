@@ -17,24 +17,9 @@ namespace UdpChat.Client
     using UdpChat.Common;
     using UdpChat.Common.Messages;
 
-    public interface IClientView
+    public class ChatClient
     {
-        void DisplayContacts(IEnumerable<Contact> contacts);
-
-        void DisplayMessage(string message);
-
-        void DisableClient();
-
-        void EnableClient();
-
-        void ShowException(Exception ex);
-    }
-
-    public class ChatClient //: IContract
-    {
-        private UdpClient _udpClient;
-
-        private IPEndPoint _serverEndPoint;
+        private readonly UdpClient _udpClient;
 
         private List<Contact> _contacts = new List<Contact>();
 
@@ -42,23 +27,20 @@ namespace UdpChat.Client
 
         private string _userName;
 
-        public ChatClient(IPEndPoint endPoint, IClientView view)
+        public ChatClient(IClientView view)
         {
             _udpClient = new UdpClient();
 
-            _udpClient.Connect(endPoint);
-
             _view = view;
-
-            this.StartReceiving();
         }
 
-        public IEnumerable<Contact> Contacts
+        public bool IsInChat { get; private set; }
+
+        public void Start(IPEndPoint serverEndPoint)
         {
-            get
-            {
-                return _contacts;
-            }
+            _udpClient.Connect(serverEndPoint);
+
+            _udpClient.BeginReceive(this.OnReceive, null);
         }
 
         public void Close()
@@ -66,6 +48,14 @@ namespace UdpChat.Client
             _udpClient.Close();
         }
 
+        #region - Методы по отправлению сообщений -
+
+        /// <summary>
+        /// Отправка сообщения о входе в чат на сервер
+        /// </summary>
+        /// <param name="user">
+        /// Имя пользователя
+        /// </param>
         public void Login(string user)
         {
             _userName = user;
@@ -73,11 +63,23 @@ namespace UdpChat.Client
             SendMessage(new LoginMessage(user));
         }
 
+        /// <summary>
+        /// Отправка сообщения о выходе пользователя из чата
+        /// </summary>
         public void Logout()
         {
             SendMessage(new LogoutMessage());
         }
 
+        /// <summary>
+        /// Отправка сообщения в чат
+        /// </summary>
+        /// <param name="receiver">
+        /// Получатель сообщения
+        /// </param>
+        /// <param name="content">
+        /// Текст сообещния
+        /// </param>
         public void SendChatMessage(Contact receiver, string content)
         {
             var message = new ChatMessage(_userName, receiver, content);
@@ -87,6 +89,12 @@ namespace UdpChat.Client
             this.OnChatMessage(message);
         }
 
+        /// <summary>
+        /// Отправка сообщения на сервере
+        /// </summary>
+        /// <param name="message">
+        /// Модель сообщения
+        /// </param>
         private void SendMessage(Message message)
         {
             var bytes = message.ToBytes();
@@ -94,23 +102,9 @@ namespace UdpChat.Client
             _udpClient.Send(bytes, bytes.Length);
         }
 
-        private Contact GetContactByEndPoint(IPEndPoint endPoint)
-        {
-            foreach (var contact in _contacts)
-            {
-                if (contact.EndPoint.Equals(endPoint))
-                {
-                    return contact;
-                }
-            }
+        #endregion
 
-            return null;
-        }
-
-        private void StartReceiving()
-        {
-            _udpClient.BeginReceive(this.OnReceive, null);
-        }
+        #region - Методы по обработке входящих сообщений -
 
         public void OnReceive(IAsyncResult asyncResult)
         {
@@ -121,33 +115,36 @@ namespace UdpChat.Client
                     return;
                 }
 
-                var endPoint = new IPEndPoint(IPAddress.Any, 0);
-
-                var bytes = _udpClient.EndReceive(asyncResult, ref endPoint);
-
-                var message = Message.FromBytes(bytes);
-
-                switch (message.Type)
+                lock (_udpClient)
                 {
-                    case MessageType.ChatMessage:
-                        OnChatMessage(message as ChatMessage);
-                        break;
-                    case MessageType.Contacts:
-                        var contactsMessage = message as ContactsMessage;
-                        _contacts = contactsMessage.Contacts;
-                        _view.DisplayContacts(_contacts);
-                        break;
-                    case MessageType.Login:
-                        _view.EnableClient();
-                        break;
-                    case MessageType.Logout:
-                        _view.DisableClient();
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                    var endPoint = new IPEndPoint(IPAddress.Any, 0);
 
-                _udpClient.BeginReceive(this.OnReceive, null);
+                    var bytes = _udpClient.EndReceive(asyncResult, ref endPoint);
+
+                    var message = Message.FromBytes(bytes);
+
+                    switch (message.Type)
+                    {
+                        case MessageType.ChatMessage:
+                            OnChatMessage(message as ChatMessage);
+                            break;
+                        case MessageType.Contacts:
+                            this.OnContactsMessage(message as ContactsMessage);
+                            break;
+                        case MessageType.Login:
+                            IsInChat = true;
+                            _view.EnableClient();
+                            break;
+                        case MessageType.Logout:
+                            IsInChat = false;
+                            _view.DisableClient();
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    _udpClient.BeginReceive(this.OnReceive, null);
+                }
             }
             catch (Exception ex)
             {
@@ -155,6 +152,24 @@ namespace UdpChat.Client
             }
         }
 
+        /// <summary>
+        /// Обработчик сообщения со списком контактов
+        /// </summary>
+        /// <param name="message">
+        /// The message.
+        /// </param>
+        private void OnContactsMessage(ContactsMessage message)
+        {
+            _contacts = message.Contacts;
+            _view.DisplayContacts(_contacts);
+        }
+
+        /// <summary>
+        /// Обработчик сообщения в чате
+        /// </summary>
+        /// <param name="chatMessage">
+        /// The chat message
+        /// </param>
         private void OnChatMessage(ChatMessage chatMessage)
         {
             var content = string.Format(
@@ -163,7 +178,9 @@ namespace UdpChat.Client
                 chatMessage.Sender, 
                 chatMessage.Content);
 
-            this._view.DisplayMessage(content);
+            _view.DisplayMessage(content);
         }
+
+        #endregion
     }
 }

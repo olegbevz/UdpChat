@@ -31,6 +31,17 @@ namespace UdpChat.Tests.MessageTests
         }
 
         [TestCase]
+        public void WlecomeMessageTest()
+        {
+            var chatMessage = new ChatMessage(
+                "SERVER",
+                new Contact("Harry Potter", new IPEndPoint(IPAddress.Parse("127.0.0.1"), 65270)),
+                "Hello, Harry Potter! Welcome to chat on server 'SERVER'!");
+
+            this.AssertMessage(chatMessage);
+        }
+
+        [TestCase]
         public void ChatMessageWithNullReceiverTest()
         {
             var chatMessage = new ChatMessage("Sender", null, "Message Content");

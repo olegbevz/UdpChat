@@ -68,7 +68,7 @@
             this.txtName.Name = "txtName";
             this.txtName.Size = new System.Drawing.Size(171, 20);
             this.txtName.TabIndex = 2;
-            this.txtName.TextChanged += new System.EventHandler(this.OnUserNameTextChanged);
+            this.txtName.TextChanged += new System.EventHandler(this.OnTextChanged);
             // 
             // txtServerIP
             // 
@@ -77,7 +77,7 @@
             this.txtServerIP.Name = "txtServerIP";
             this.txtServerIP.Size = new System.Drawing.Size(121, 20);
             this.txtServerIP.TabIndex = 3;
-            this.txtServerIP.TextChanged += new System.EventHandler(this.OnServerIpTextChanged);
+            this.txtServerIP.TextChanged += new System.EventHandler(this.OnTextChanged);
             // 
             // label1
             // 
@@ -104,7 +104,7 @@
             this.txtPort.Name = "txtPort";
             this.txtPort.Size = new System.Drawing.Size(44, 20);
             this.txtPort.TabIndex = 6;
-            this.txtPort.TextChanged += new System.EventHandler(this.OnServerPortTextChanged);
+            this.txtPort.TextChanged += new System.EventHandler(this.OnTextChanged);
             // 
             // checkBox1
             // 

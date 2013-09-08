@@ -18,11 +18,30 @@ namespace UdpChat.Client
 
     public partial class ClientForm : Form, IClientView
     {
-        private ChatClient _chatClient;
+        private readonly ChatClient _chatClient;
 
         public ClientForm()
         {
             InitializeComponent();
+
+            _chatClient = new ChatClient(this);
+        }
+
+        private void OnLogoutButtonClick(object sender, EventArgs e)
+        {
+            try
+            {
+                _chatClient.Logout();
+            }
+            catch (Exception ex)
+            {
+                this.ShowException(ex);
+            }
+        }
+
+        private void OnExitButtonClick(object sender, EventArgs e)
+        {
+            this.Close();
         }
 
         private void OnSendButtonClick(object sender, EventArgs e)
@@ -40,54 +59,71 @@ namespace UdpChat.Client
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                this.ShowException(ex);
+            }
+        }
+
+        private void OnLoginButtonClick(object sender, EventArgs e)
+        {
+            try
+            {
+                ShowLoginDialog();
+            }
+            catch (Exception ex)
+            {
+                this.ShowException(ex);
             }
         }
 
         protected override void OnShown(EventArgs e)
         {
-            ShowLoginDialog();
+            try
+            {
+                ShowLoginDialog();
 
-            txtMessage.Select();
+                txtMessage.Select();
+            }
+            catch (Exception ex)
+            {
+                this.ShowException(ex);
+            }
 
             base.OnShown(e);
         }
 
         protected override void OnClosed(EventArgs e)
         {
-            if (_chatClient != null)
+            try
             {
-                _chatClient.Logout();
+                if (_chatClient != null)
+                {
+                    if (_chatClient.IsInChat)
+                    {
+                        _chatClient.Logout();
+                    }
 
-                _chatClient.Close();
+                    _chatClient.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                this.ShowException(ex);
             }
 
             base.OnClosed(e);
         }
 
-        private void OnLoginButtonClick(object sender, EventArgs e)
-        {
-            this.ShowLoginDialog();
-        }
-
         private void ShowLoginDialog()
         {
-            try
+            var dialog = new LoginDialog();
+
+            if (dialog.ShowDialog(this) == DialogResult.OK)
             {
-                var dialog = new LoginDialog();
+                var endPoint = new IPEndPoint(IPAddress.Parse(dialog.ServerIP), int.Parse(dialog.ServerPort));
 
-                if (dialog.ShowDialog(this) == DialogResult.OK)
-                {
-                    var endPoint = new IPEndPoint(IPAddress.Parse(dialog.ServerIP), int.Parse(dialog.ServerPort));
+                _chatClient.Start(endPoint);
 
-                    this._chatClient = new ChatClient(endPoint, this);
-
-                    this._chatClient.Login(dialog.User);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
+                _chatClient.Login(dialog.User);
             }
         }
 
@@ -128,7 +164,6 @@ namespace UdpChat.Client
                         txtMessage.Enabled = false;
                         btnSend.Enabled = false;
                         lstChatters.Items.Clear();
-                        txtChatBox.Clear();
                         txtMessage.Clear();
                     });
         }
@@ -148,23 +183,6 @@ namespace UdpChat.Client
         public void ShowException(Exception ex)
         {
            ErrorHandling.ShowExceptionThreadSafe(this, ex);
-        }
-
-        private void OnLogoutButtonClick(object sender, EventArgs e)
-        {
-            try
-            {
-                _chatClient.Logout();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-
-        private void OnExitButtonClick(object sender, EventArgs e)
-        {
-            this.Close();
         }
     }
 }

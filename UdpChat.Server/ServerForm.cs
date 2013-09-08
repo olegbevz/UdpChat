@@ -16,7 +16,7 @@ namespace UdpChat.Server
 
     public partial class ServerForm : Form, IServerView, ILogging
     {
-        private ChatServer _chatServer;
+        private readonly ChatServer _chatServer;
 
         public ServerForm()
         {
@@ -25,6 +25,10 @@ namespace UdpChat.Server
             stopToolStripMenuItem.Enabled = false;
             txtServerName.Text = Properties.Settings.Default.ServerName;
             txtServerPort.Text = Properties.Settings.Default.ServerPort;
+
+            var eventLogging = new EventLogging("Udp Chat", "Application");
+
+            _chatServer = new ChatServer(this, new ILogging[] { this, eventLogging });
         }
 
         private void OnStartServerButtonClick(object sender, EventArgs e)
@@ -45,9 +49,7 @@ namespace UdpChat.Server
                     throw new Exception("Server port is not correct.");
                 }
 
-                var eventLogging = new EventLogging("Udp Chat", "Application");
-
-                _chatServer = new ChatServer(port, name, this, new ILogging[] { this, eventLogging });
+                _chatServer.Start(port, name);
 
                 stopToolStripMenuItem.Enabled = true;
                 startToolStripMenuItem.Enabled = false;
@@ -77,11 +79,47 @@ namespace UdpChat.Server
             }
         }
 
+        private void OnExitButtonClick(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void OnTimerTick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (_chatServer != null)
+                {
+                    _chatServer.DisconnectInactiveContacts();
+                }
+            }
+            catch (Exception ex)
+            {
+                this.ShowException(ex);
+            }
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            this.WriteLog("Server is not started yet.");
+
+            InactiveContactsTimer.Start();
+
+            base.OnLoad(e);
+        }
+
         protected override void OnClosed(EventArgs e)
         {
-            if (_chatServer != null)
+            try
             {
-                _chatServer.Close();
+                if (_chatServer != null)
+                {
+                    _chatServer.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                this.ShowException(ex);
             }
 
             base.OnClosed(e);
@@ -106,7 +144,7 @@ namespace UdpChat.Server
 
         public void ShowException(Exception ex)
         {
-            Common.ErrorHandling.ShowExceptionThreadSafe(this, ex);
+            ErrorHandling.ShowExceptionThreadSafe(this, ex);
         }
     }
 }

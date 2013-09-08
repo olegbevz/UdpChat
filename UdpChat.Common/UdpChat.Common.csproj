@@ -42,7 +42,6 @@
     <Compile Include="Messages\ChatMessage.cs" />
     <Compile Include="Contact.cs" />
     <Compile Include="Messages\ContactsMessage.cs" />
-    <Compile Include="IContract.cs" />
     <Compile Include="Messages\Cryptography.cs" />
     <Compile Include="Messages\LoginMessage.cs" />
     <Compile Include="Messages\LogoutMessage.cs" />
