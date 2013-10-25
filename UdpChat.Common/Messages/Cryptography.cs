@@ -73,7 +73,6 @@ namespace UdpChat.Common.Messages
                         }
                     }
                 }
-
             }
         }
     }
