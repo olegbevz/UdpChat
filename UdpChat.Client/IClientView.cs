@@ -46,7 +46,7 @@ namespace UdpChat.Client
         void EnableClient();
 
         /// <summary>
-        /// Отобоазить сообщение обошибке
+        /// Отобразить сообщение обошибке
         /// </summary>
         /// <param name="ex">
         /// The ex.
