@@ -19,33 +19,35 @@ namespace UdpChat.Client
 
     public class ChatClient
     {
-        private readonly UdpClient _udpClient;
+        private readonly UdpClient udpClient;
 
-        private List<Contact> _contacts = new List<Contact>();
+        private List<Contact> contacts = new List<Contact>();
 
-        private IClientView _view;
+        private IClientView clientView;
 
-        private string _userName;
+        private string userName;
+
+        private string serverName;
 
         public ChatClient(IClientView view)
         {
-            _udpClient = new UdpClient();
+            udpClient = new UdpClient();
             
-            _view = view;
+            this.clientView = view;
         }
 
         public bool IsInChat { get; private set; }
 
         public void Start(IPEndPoint serverEndPoint)
         {
-            _udpClient.Connect(serverEndPoint);
+            udpClient.Connect(serverEndPoint);
 
-            _udpClient.BeginReceive(this.OnReceive, null);
+            udpClient.BeginReceive(this.OnReceive, null);
         }
 
         public void Close()
         {
-            _udpClient.Close();
+            udpClient.Close();
         }
 
         #region - Методы по отправлению сообщений -
@@ -58,7 +60,7 @@ namespace UdpChat.Client
         /// </param>
         public void Login(string user)
         {
-            _userName = user;
+            userName = user;
 
             SendMessage(new LoginMessage(user));
         }
@@ -82,7 +84,7 @@ namespace UdpChat.Client
         /// </param>
         public void SendChatMessage(Contact receiver, string content)
         {
-            var message = new ChatMessage(_userName, receiver, content);
+            var message = new ChatMessage(userName, receiver, content);
 
             SendMessage(message);
 
@@ -99,7 +101,7 @@ namespace UdpChat.Client
         {
             var bytes = message.ToBytes();
 
-            _udpClient.BeginSend(bytes, bytes.Length, null, null);
+            udpClient.BeginSend(bytes, bytes.Length, null, null);
         }
 
         #endregion
@@ -110,16 +112,16 @@ namespace UdpChat.Client
         {
             try
             {
-                if (_udpClient.Client == null)
+                if (udpClient.Client == null)
                 {
                     return;
                 }
 
-                lock (_udpClient)
+                lock (udpClient)
                 {
                     var endPoint = new IPEndPoint(IPAddress.Any, 0);
 
-                    var bytes = _udpClient.EndReceive(asyncResult, ref endPoint);
+                    var bytes = udpClient.EndReceive(asyncResult, ref endPoint);
 
                     var message = Message.FromBytes(bytes);
 
@@ -141,20 +143,21 @@ namespace UdpChat.Client
                             throw new ArgumentOutOfRangeException("Unknown message was received.");
                     }
 
-                    _udpClient.BeginReceive(this.OnReceive, null);
+                    udpClient.BeginReceive(this.OnReceive, null);
                 }
             }
             catch (Exception ex)
             {
-                _view.ShowException(ex);
+                clientView.ShowException(ex);
             }
         }
 
         private void OnLoginAcceptedMessage(LoginAcceptedMessage message)
         {
             IsInChat = true;
-            _view.EnableClient();
-            _view.DisplayContacts(message.Contacts);
+            this.serverName = message.ServerName;
+            clientView.EnableClient();
+            clientView.DisplayContacts(message.Contacts);
 
             DiplayMessage(message.ServerName, message.WelcomeMessage);
         }
@@ -162,9 +165,9 @@ namespace UdpChat.Client
         private void OnLogoutAcceptedMessage(LogoutAcceptedMessage message)
         {
             IsInChat = false;
-            _view.DisableClient();
+            clientView.DisableClient();
 
-            DiplayMessage(message.ServerName, message.GoodByeMessage);
+            DiplayMessage(this.serverName, message.GoodByeMessage);
         }
 
         /// <summary>
@@ -175,9 +178,9 @@ namespace UdpChat.Client
         /// </param>
         private void OnContactsMessage(ContactsMessage message)
         {
-            _contacts = message.Contacts;
+            contacts = message.Contacts;
 
-            _view.DisplayContacts(_contacts);
+            clientView.DisplayContacts(contacts);
         }
 
         /// <summary>
@@ -199,7 +202,7 @@ namespace UdpChat.Client
                sender,
                message);
 
-            _view.DisplayMessage(content);
+            clientView.DisplayMessage(content);
         }
 
         #endregion

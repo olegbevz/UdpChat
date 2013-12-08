@@ -2,18 +2,10 @@
 {
     public class LogoutAcceptedMessage : Message
     {
-        public LogoutAcceptedMessage(string serverName, string goodByeMessage)
+        public LogoutAcceptedMessage(string goodByeMessage)
         {
-            ServerName = serverName;
-
             GoodByeMessage = goodByeMessage;
         }
-
-        /// <summary>
-        /// Gets or sets the server name.
-        /// Имя сервера
-        /// </summary>
-        public string ServerName { get; set; }
 
         /// <summary>
         /// Gets or sets the good bye message.

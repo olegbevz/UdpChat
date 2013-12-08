@@ -24,6 +24,7 @@ namespace UdpChat.Common.Messages
             if (string.IsNullOrEmpty(data))
             {
                 throw new ArgumentNullException("data");
+
             }
 
             using (var cryptoProvider = new DESCryptoServiceProvider())

@@ -21,35 +21,35 @@ namespace UdpChat.Server
 
     public class ChatServer
     {
-        private UdpClient _udpServer;
+        private UdpClient udpServer;
 
         /// <summary>
         /// Список контактов
         /// </summary>
-        private readonly List<Contact> _contacts = new List<Contact>();
+        private readonly List<Contact> contacts = new List<Contact>();
 
         /// <summary>
         /// Имя сервера
         /// </summary>
-        private string _serverName;
+        private string serverName;
 
         /// <summary>
         /// Окно сервера
         /// </summary>
-        private readonly IServerView _view;
+        private readonly IServerView serverView;
 
         /// <summary>
         /// Список источников для вывода логов
         /// </summary>
-        private readonly IEnumerable<ILogging> _loggers;
+        private readonly IEnumerable<ILogging> loggers;
 
-        private readonly TimeSpan _contactTimeout = TimeSpan.FromMinutes(1);
+        private readonly TimeSpan contactTimeout = TimeSpan.FromMinutes(1);
 
         public ChatServer(IServerView view, IEnumerable<ILogging> loggers)
         {
-            _view = view;
+            this.serverView = view;
 
-            _loggers = loggers;
+            this.loggers = loggers;
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace UdpChat.Server
         /// </param>
         public void Start(int port, string serverName)
         {
-            _serverName = serverName;
+            this.serverName = serverName;
 
             WriteLog(string.Format(
                 "Server \'{0}\' was started at {1}:{2}.",
@@ -71,9 +71,9 @@ namespace UdpChat.Server
                 this.GetLocalIP() ?? IPAddress.None,
                 port));
 
-            _udpServer = new UdpClient(port);
+            udpServer = new UdpClient(port);
 
-            _udpServer.BeginReceive(OnReceive, null);
+            udpServer.BeginReceive(OnReceive, null);
         }
 
         /// <summary>
@@ -81,16 +81,16 @@ namespace UdpChat.Server
         /// </summary>
         public void Close()
         {
-            foreach (var contact in _contacts)
+            foreach (var contact in contacts)
             {
                 SendLogoutAcceptedMessage(contact);
             }
 
-            _contacts.Clear();
+            contacts.Clear();
 
-            _udpServer.Close();
+            udpServer.Close();
 
-            WriteLog(string.Format("Server \'{0}\' was closed.", _serverName));
+            WriteLog(string.Format("Server \'{0}\' was closed.", serverName));
         }
 
         /// <summary>
@@ -102,9 +102,9 @@ namespace UdpChat.Server
 
             var inactiveContacts = new List<Contact>();
 
-            foreach (var contact in _contacts)
+            foreach (var contact in contacts)
             {
-                if (currentTime - contact.LastActiveTime > _contactTimeout)
+                if (currentTime - contact.LastActiveTime > contactTimeout)
                 {
                     inactiveContacts.Add(contact);
                 }
@@ -121,7 +121,7 @@ namespace UdpChat.Server
 
                 SendLogoutAcceptedMessage(inactiveContact);
 
-                _contacts.Remove(inactiveContact);
+                contacts.Remove(inactiveContact);
             }
 
             if (inactiveContacts.Count > 0)
@@ -144,16 +144,16 @@ namespace UdpChat.Server
         {
             try
             {
-                lock (_udpServer)
+                lock (udpServer)
                 {
                     var endPoint = new IPEndPoint(IPAddress.Any, 0);
 
-                    if (_udpServer.Client == null)
+                    if (udpServer.Client == null)
                     {
                         return;
                     }
 
-                    var bytes = _udpServer.EndReceive(asyncResult, ref endPoint);
+                    var bytes = udpServer.EndReceive(asyncResult, ref endPoint);
 
                     var message = Message.FromBytes(bytes);
 
@@ -172,12 +172,12 @@ namespace UdpChat.Server
                             throw new ArgumentOutOfRangeException();
                     }
 
-                    _udpServer.BeginReceive(this.OnReceive, null);
+                    udpServer.BeginReceive(this.OnReceive, null);
                 }
             }
             catch (Exception ex)
             {
-                _view.ShowException(ex);
+                serverView.ShowException(ex);
             }
         }
 
@@ -218,7 +218,7 @@ namespace UdpChat.Server
 
             if (logoutContact != null)
             {
-                _contacts.Remove(logoutContact);
+                contacts.Remove(logoutContact);
 
                 // Отсылаем подтверждение об удалении пользователя на сервере
                 this.SendLogoutAcceptedMessage(logoutContact);
@@ -253,7 +253,7 @@ namespace UdpChat.Server
             }
             else
             {
-                _contacts.Add(contact);
+                contacts.Add(contact);
 
                 // Отсылаем подтверждение о добавлении пользователя на сервере
                 SendLoginAcceptedMessage(contact);
@@ -279,7 +279,7 @@ namespace UdpChat.Server
         {
             var goodByeMessage = string.Format("Goodbye, {0}!", contact.Name);
 
-            SendMessage(new LogoutAcceptedMessage(_serverName, goodByeMessage), contact.EndPoint);
+            SendMessage(new LogoutAcceptedMessage(goodByeMessage), contact.EndPoint);
         }
 
         /// <summary>
@@ -291,10 +291,10 @@ namespace UdpChat.Server
         private void SendLoginAcceptedMessage(Contact contact)
         {
             var welcomeMessage = string.Format(
-                "Hello, {0}! Welcome to chat on server \'{1}\'!", contact.Name, _serverName);
+                "Hello, {0}! Welcome to chat on server \'{1}\'!", contact.Name, serverName);
 
             this.SendMessage(
-                new LoginAcceptedMessage(_serverName, welcomeMessage, _contacts), 
+                new LoginAcceptedMessage(serverName, welcomeMessage, contacts), 
                 contact.EndPoint);
         }
 
@@ -311,7 +311,7 @@ namespace UdpChat.Server
         {
             SendMessage(
                new ChatMessage(
-                   _serverName,
+                   serverName,
                    contact,
                    message),
                contact.EndPoint);
@@ -322,7 +322,7 @@ namespace UdpChat.Server
         /// </summary>
         private void BroadcastContactsMessage()
         {
-            foreach (var contact in _contacts)
+            foreach (var contact in contacts)
             {
                 this.SendContractsMessage(contact.EndPoint);
             }
@@ -333,7 +333,7 @@ namespace UdpChat.Server
         /// </summary>
         private void BroadcastContactsMessage(Contact exceptedContact)
         {
-            foreach (var contact in _contacts)
+            foreach (var contact in contacts)
             {
                 if (!contact.Equals(exceptedContact))
                 {
@@ -350,7 +350,7 @@ namespace UdpChat.Server
         /// </param>
         private void SendContractsMessage(IPEndPoint endPoint)
         {
-            this.SendMessage(new ContactsMessage(_contacts), endPoint);
+            this.SendMessage(new ContactsMessage(contacts), endPoint);
         }
 
         /// <summary>
@@ -366,7 +366,7 @@ namespace UdpChat.Server
         {
             var bytes = message.ToBytes();
 
-            _udpServer.Send(bytes, bytes.Length, endPoint);
+            udpServer.Send(bytes, bytes.Length, endPoint);
         }
 
         #endregion
@@ -382,7 +382,7 @@ namespace UdpChat.Server
         /// </returns>
         private Contact GetContactByEndPoint(IPEndPoint endPoint)
         {
-            foreach (var contact in _contacts)
+            foreach (var contact in contacts)
             {
                 if (contact.EndPoint.Equals(endPoint))
                 {
@@ -401,7 +401,7 @@ namespace UdpChat.Server
         /// </param>
         private void WriteLog(string log)
         {
-            foreach (var logging in _loggers)
+            foreach (var logging in loggers)
             {
                 logging.WriteLog(log);
             }
