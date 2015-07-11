@@ -65,7 +65,6 @@
             }
 
             var contact = obj as Contact;
-
             if (contact != null)
             {
                 return contact.Name == Name && contact.EndPoint.Equals(EndPoint);
