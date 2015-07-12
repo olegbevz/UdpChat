@@ -18,8 +18,7 @@
         }
 
         public Contact()
-        {
-            
+        {            
         }
 
         /// <summary>
