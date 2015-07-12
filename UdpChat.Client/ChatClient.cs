@@ -31,8 +31,7 @@ namespace UdpChat.Client
 
         public ChatClient(IClientView view)
         {
-            udpClient = new UdpClient();
-            
+            udpClient = new UdpClient();            
             this.clientView = view;
         }
 
