@@ -13,9 +13,7 @@
         public Contact(string name, IPEndPoint endPoint)
         {
             Name = name;
-
             IP = endPoint.Address.ToString();
-
             Port = endPoint.Port;
         }
 
