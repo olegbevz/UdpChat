@@ -14,11 +14,9 @@ namespace UdpChat.Common.Messages
     /// </summary>
     public class ChatMessage : Message
     {
-        public ChatMessage(string sender, Contact receiver, string content)
+        public ChatMessage(string sender, string content)
         {
             this.Sender = sender;
-
-            this.Receiver = receiver;
 
             this.Content = content;
         }
@@ -28,12 +26,6 @@ namespace UdpChat.Common.Messages
         /// Отправитель сообщения
         /// </summary>
         public string Sender { get; set; }
-
-        /// <summary>
-        /// Gets or sets the receiver.
-        /// Получатель сообщения
-        /// </summary>
-        public Contact Receiver { get; set; }
 
         /// <summary>
         /// Gets or sets the content.
@@ -59,9 +51,8 @@ namespace UdpChat.Common.Messages
 
             if (chatMessage != null)
             {
-                return chatMessage.Sender == this.Sender 
-                    && ((chatMessage.Receiver == null && this.Receiver == null) || chatMessage.Receiver.Equals(this.Receiver))
-                       && chatMessage.Content == this.Content;
+                return chatMessage.Sender == this.Sender && 
+                    chatMessage.Content == this.Content;
             }
 
             return false;

@@ -50,9 +50,7 @@ namespace UdpChat.Client
             {
                 if (lstChatters.SelectedItem != null)
                 {
-                    var contact = lstChatters.SelectedItem as Contact;
-
-                    _chatClient.SendChatMessage(contact, txtMessage.Text);
+                    _chatClient.SendChatMessage(txtMessage.Text);
 
                     txtMessage.Text = string.Empty;
                 }

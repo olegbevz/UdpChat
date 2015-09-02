@@ -20,31 +20,21 @@ namespace UdpChat.Tests.MessageTests
     public class ChatMessageTests : MessageTests
     {
         [TestCase]
-        public void ChatMessageWithSimpleSenderAndReceiverTest()
+        public void ChatMessageWithSimpleSenderTest()
         {
             var chatMessage = new ChatMessage(
-                "Sender", 
-                new Contact("Receiver", new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8888)), 
+                "Sender",
                 "Message Content");
 
             this.AssertMessage(chatMessage);
         }
 
         [TestCase]
-        public void WlecomeMessageTest()
+        public void WelcomeMessageTest()
         {
             var chatMessage = new ChatMessage(
                 "SERVER",
-                new Contact("Harry Potter", new IPEndPoint(IPAddress.Parse("127.0.0.1"), 65270)),
                 "Hello, Harry Potter! Welcome to chat on server 'SERVER'!");
-
-            this.AssertMessage(chatMessage);
-        }
-
-        [TestCase]
-        public void ChatMessageWithNullReceiverTest()
-        {
-            var chatMessage = new ChatMessage("Sender", null, "Message Content");
 
             this.AssertMessage(chatMessage);
         }
@@ -54,7 +44,6 @@ namespace UdpChat.Tests.MessageTests
         {
             var chatMessage = new ChatMessage(
                 null,
-                new Contact("Receiver", new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8888)),
                 "Message Content");
 
             this.AssertMessage(chatMessage);
@@ -65,7 +54,6 @@ namespace UdpChat.Tests.MessageTests
         {
             var chatMessage = new ChatMessage(
                 string.Empty,
-                new Contact("Receiver", new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8888)),
                 "Message Content");
 
             this.AssertMessage(chatMessage);
@@ -76,7 +64,6 @@ namespace UdpChat.Tests.MessageTests
         {
             var chatMessage = new ChatMessage(
                 "Sender",
-                new Contact("Receiver", new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8888)),
                 string.Empty);
 
             this.AssertMessage(chatMessage);
@@ -87,7 +74,6 @@ namespace UdpChat.Tests.MessageTests
         {
             var chatMessage = new ChatMessage(
                 "Sender",
-                new Contact("Receiver", new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8888)),
                 null);
 
             this.AssertMessage(chatMessage);
@@ -98,7 +84,6 @@ namespace UdpChat.Tests.MessageTests
         {
             var chatMessage = new ChatMessage(
                 "Sender",
-                new Contact("Receiver", new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8888)),
                 new string('a', 9999));
 
             this.AssertMessage(chatMessage);

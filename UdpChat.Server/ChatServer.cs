@@ -117,7 +117,7 @@ namespace UdpChat.Server
                         "{0}, you were inactive for too long in our chat. Now I will disconnect you.",
                         inactiveContact.Name);
 
-                SendChatMessage(message, inactiveContact);
+                SendChatMessage(inactiveContact, message);
 
                 SendLogoutAcceptedMessage(inactiveContact);
 
@@ -196,11 +196,9 @@ namespace UdpChat.Server
 
             sender.LastActiveTime = DateTime.Now;
 
-            var receiver = this.GetContactByEndPoint(message.Receiver.EndPoint);
+            BroadcastChatMessage(message);
 
-            this.SendMessage(message, receiver.EndPoint);
-
-            WriteLog(string.Format("\'{0}\' has written to \'{1}\' a message \'{2}\'.", message.Sender, receiver.Name, message.Content));
+            WriteLog(string.Format("\'{0}\' has written a message \'{1}\'.", message.Sender, message.Content));
         }
 
         /// <summary>
@@ -230,7 +228,7 @@ namespace UdpChat.Server
             }
             else
             {
-                SendChatMessage("There is no contact with this endpoint.", new Contact(string.Empty, endPoint));
+                SendChatMessage(new Contact(string.Empty, endPoint), "There is no contact with this endpoint.");
             }
         }
 
@@ -249,7 +247,7 @@ namespace UdpChat.Server
             
             if (GetContactByEndPoint(endPoint) != null)
             {
-                SendChatMessage("Contact with the same endpoint already exists.", contact);
+                SendChatMessage(contact, "Contact with the same endpoint already exists.");
             }
             else
             {
@@ -298,6 +296,14 @@ namespace UdpChat.Server
                 contact.EndPoint);
         }
 
+        private void BroadcastChatMessage(ChatMessage chatMessage)
+        {
+            foreach (var contact in contacts)
+            {
+                this.SendMessage(chatMessage, contact.EndPoint);
+            }
+        }
+
         /// <summary>
         /// Отправить сообщение пользователю в чат от сервера
         /// </summary>
@@ -307,12 +313,11 @@ namespace UdpChat.Server
         /// <param name="contact">
         /// Получатель сообщения
         /// </param>
-        private void SendChatMessage(string message, Contact contact)
+        private void SendChatMessage(Contact contact, string message)
         {
             SendMessage(
                new ChatMessage(
                    serverName,
-                   contact,
                    message),
                contact.EndPoint);
         }

@@ -42,6 +42,6 @@ namespace UdpChat.Common.Messages
         /// <summary>
         /// Сообщение со списком контактов
         /// </summary>
-        Contacts,       
+        Contacts
     }
 }

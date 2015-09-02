@@ -81,13 +81,11 @@ namespace UdpChat.Client
         /// <param name="content">
         /// Текст сообещния
         /// </param>
-        public void SendChatMessage(Contact receiver, string content)
+        public void SendChatMessage(string content)
         {
-            var message = new ChatMessage(userName, receiver, content);
+            var message = new ChatMessage(userName, content);
 
             SendMessage(message);
-
-            this.OnChatMessage(message);
         }
 
         /// <summary>
