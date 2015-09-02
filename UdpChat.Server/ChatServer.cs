@@ -88,7 +88,10 @@ namespace UdpChat.Server
 
             contacts.Clear();
 
-            udpServer.Close();
+            if (udpServer != null)
+            {
+                udpServer.Close();
+            }            
 
             WriteLog(string.Format("Server \'{0}\' was closed.", serverName));
         }
